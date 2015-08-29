@@ -8,6 +8,6 @@ Saved
 *.exe
 *-DebugGame.dll
 Binaries
-Content
+StarterContent/
 *.log
 *.target.xml

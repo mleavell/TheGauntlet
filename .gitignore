@@ -8,6 +8,10 @@ Saved
 *.exe
 *-DebugGame.dll
 Binaries
-StarterContent/
+Textures/
+Shapes/
+Props/
+Particles/
+Materials/
 *.log
 *.target.xml

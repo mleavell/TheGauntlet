@@ -25,7 +25,7 @@ public:
 
 	/** Only odd values. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dimensions")
-	int32 MazeLenghInTiles;
+	int32 MazeLengthInTiles;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dimensions")
 	float TileSize;

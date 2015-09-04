@@ -12,7 +12,7 @@ AMazeSegment::AMazeSegment()
 
 	IsCenterPiece = false;
 	TileSize = 400.f;
-	MazeLenghInTiles = 41;
+	MazeLengthInTiles = 41;
 	FloorHeight = 100.f;
 	InnerWallHeight = 600.f;
 	OuterWallHeight = 800.f;
@@ -29,8 +29,8 @@ void AMazeSegment::PostInitProperties()
 void AMazeSegment::CalculateValues()
 {
 	HalfTileSize = TileSize / 2.f;
-	if (MazeLenghInTiles % 2 == 0) {
-		MazeLenghInTiles++;
+	if (MazeLengthInTiles % 2 == 0) {
+		MazeLengthInTiles++;
 	}
 }
 
@@ -49,7 +49,7 @@ void AMazeSegment::BeginPlay()
 	Super::BeginPlay();
 	SpawnFloor();
 	SpawnBorders();
-	CreateMazeLayout();
+	this->CreateMazeLayout();
 
 	if (!IsCenterPiece) {
 		SpawnWalls();
@@ -66,24 +66,23 @@ void AMazeSegment::Tick( float DeltaTime )
 
 }
 
-void AMazeSegment::ChangeMazeParameters(int32 MazeLenghInTiles, float TileSize, float FloorHeight, float InnerWallHeight, float OuterWallHeight) 
+void AMazeSegment::ChangeMazeParameters(int32 MazeLengthInTiles, float TileSize, float FloorHeight, float InnerWallHeight, float OuterWallHeight) 
 {
 	this->TileSize = TileSize;
 	this->HalfTileSize = TileSize / 2.f;
-	this->MazeLenghInTiles = MazeLenghInTiles;
+	this->MazeLengthInTiles = MazeLengthInTiles;
 	this->FloorHeight = FloorHeight;
 	this->InnerWallHeight = InnerWallHeight;
 	this->OuterWallHeight = OuterWallHeight;
 }
 
 void AMazeSegment::CreateMazeLayout() {
-	FMazeRowData PathRow;
 	if (!IsCenterPiece) {
 		FMazeRowData CellRow;
 		FMazeRowData WallRow;
 
-		WallRow.Column.Init(ETileDesignation::TD_Wall, MazeLenghInTiles);
-		for (int32 index = 0; index < MazeLenghInTiles; index++) {
+		WallRow.Column.Init(ETileDesignation::TD_Wall, MazeLengthInTiles);
+		for (int32 index = 0; index < MazeLengthInTiles; index++) {
 			if (index % 2 == 1) {
 				CellRow.Column.Add(ETileDesignation::TD_Wall);
 			}
@@ -93,7 +92,7 @@ void AMazeSegment::CreateMazeLayout() {
 
 		}
 
-		for (int32 index = 0; index < MazeLenghInTiles; index++) {
+		for (int32 index = 0; index < MazeLengthInTiles; index++) {
 			if (index % 2 == 1) {
 				Row.Add(WallRow);
 			}
@@ -118,7 +117,7 @@ void AMazeSegment::CreateMazeLayout() {
 			}
 
 			// Lower Neighbor
-			if (StackHead.y + 2 < MazeLenghInTiles && Row[StackHead.y + 2].Column[StackHead.x] == ETileDesignation::TD_Cell) {
+			if (StackHead.y + 2 < MazeLengthInTiles && Row[StackHead.y + 2].Column[StackHead.x] == ETileDesignation::TD_Cell) {
 				ValidNeighbors.Add(FIntPair(StackHead.x, StackHead.y + 2));
 			}
 
@@ -128,7 +127,7 @@ void AMazeSegment::CreateMazeLayout() {
 			}
 
 			// Right Neighbor
-			if (StackHead.x + 2 < MazeLenghInTiles && Row[StackHead.y].Column[StackHead.x + 2] == ETileDesignation::TD_Cell) {
+			if (StackHead.x + 2 < MazeLengthInTiles && Row[StackHead.y].Column[StackHead.x + 2] == ETileDesignation::TD_Cell) {
 				ValidNeighbors.Add(FIntPair(StackHead.x + 2, StackHead.y));
 			}
 
@@ -165,8 +164,9 @@ void AMazeSegment::CreateMazeLayout() {
 
 		}
 	} else {
-		PathRow.Column.Init(ETileDesignation::TD_Path, MazeLenghInTiles);
-		for (int32 index = 0; index < MazeLenghInTiles; index++) {
+		FMazeRowData PathRow;
+		PathRow.Column.Init(ETileDesignation::TD_Path, MazeLengthInTiles);
+		for (int32 index = 0; index < MazeLengthInTiles; index++) {
 			Row.Add(PathRow);
 
 		}
@@ -175,7 +175,7 @@ void AMazeSegment::CreateMazeLayout() {
 }
 
 ETileDesignation AMazeSegment::GetTileDesignationAt(int32 TileRow, int32 TileColumn) {
-	if (TileRow >= 0 && TileRow < MazeLenghInTiles && TileColumn >= 0 && TileColumn < MazeLenghInTiles) {
+	if (TileRow >= 0 && TileRow < MazeLengthInTiles && TileColumn >= 0 && TileColumn < MazeLengthInTiles) {
 		return Row[TileRow].Column[TileColumn];
 	}
 
@@ -205,7 +205,7 @@ void AMazeSegment::FindPathBetweenPoints(FIntPair StartPoint, FIntPair EndPoint,
 					CopyRow[StartPoint.y + 1].Column[StartPoint.x] = ETileDesignation::TD_Visited;
 				}
 			}
-			else if (StartDirection == EDirection::D_East && StartPoint.x < MazeLenghInTiles && CopyRow[StartPoint.y].Column[StartPoint.x + 1] == ETileDesignation::TD_Path) {
+			else if (StartDirection == EDirection::D_East && StartPoint.x < MazeLengthInTiles && CopyRow[StartPoint.y].Column[StartPoint.x + 1] == ETileDesignation::TD_Path) {
 				if (IsValidTileLocation(StartPoint.y, StartPoint.x - 1)) {
 					CopyRow[StartPoint.y].Column[StartPoint.x - 1] = ETileDesignation::TD_Visited;
 				}
@@ -216,7 +216,7 @@ void AMazeSegment::FindPathBetweenPoints(FIntPair StartPoint, FIntPair EndPoint,
 					CopyRow[StartPoint.y + 1].Column[StartPoint.x] = ETileDesignation::TD_Visited;
 				}
 			}
-			else if (StartDirection == EDirection::D_South && StartPoint.y < MazeLenghInTiles && CopyRow[StartPoint.y + 1].Column[StartPoint.x] == ETileDesignation::TD_Path) {
+			else if (StartDirection == EDirection::D_South && StartPoint.y < MazeLengthInTiles && CopyRow[StartPoint.y + 1].Column[StartPoint.x] == ETileDesignation::TD_Path) {
 				if (IsValidTileLocation(StartPoint.y, StartPoint.x - 1)) {
 					CopyRow[StartPoint.y].Column[StartPoint.x - 1] = ETileDesignation::TD_Visited;
 				}
@@ -253,7 +253,7 @@ void AMazeSegment::FindPathBetweenPoints(FIntPair StartPoint, FIntPair EndPoint,
 			}
 
 			// Lower Neighbor
-			if (StackHead.y + 1 < MazeLenghInTiles && CopyRow[StackHead.y + 1].Column[StackHead.x] == ETileDesignation::TD_Path) {
+			if (StackHead.y + 1 < MazeLengthInTiles && CopyRow[StackHead.y + 1].Column[StackHead.x] == ETileDesignation::TD_Path) {
 				ValidNeighbors.Add(FIntPair(StackHead.x, StackHead.y + 1));
 			}
 
@@ -263,7 +263,7 @@ void AMazeSegment::FindPathBetweenPoints(FIntPair StartPoint, FIntPair EndPoint,
 			}
 
 			// Right Neighbor
-			if (StackHead.x + 1 < MazeLenghInTiles && CopyRow[StackHead.y].Column[StackHead.x + 1] == ETileDesignation::TD_Path) {
+			if (StackHead.x + 1 < MazeLengthInTiles && CopyRow[StackHead.y].Column[StackHead.x + 1] == ETileDesignation::TD_Path) {
 				ValidNeighbors.Add(FIntPair(StackHead.x + 1, StackHead.y));
 			}
 
@@ -305,7 +305,7 @@ void AMazeSegment::GetAllTilesInSection(FIntPair StartPoint, TArray<FIntPair> & 
 			if (IsValidTileLocation(StartPoint.y + 1, StartPoint.x)) {
 				CopyRow[StartPoint.y + 1].Column[StartPoint.x] = ETileDesignation::TD_Visited;
 			}
-		} else if (StartDirection == EDirection::D_East && StartPoint.x < MazeLenghInTiles && CopyRow[StartPoint.y].Column[StartPoint.x + 1] == ETileDesignation::TD_Path) {
+		} else if (StartDirection == EDirection::D_East && StartPoint.x < MazeLengthInTiles && CopyRow[StartPoint.y].Column[StartPoint.x + 1] == ETileDesignation::TD_Path) {
 			if (IsValidTileLocation(StartPoint.y, StartPoint.x - 1)) {
 				CopyRow[StartPoint.y].Column[StartPoint.x - 1] = ETileDesignation::TD_Visited;
 			}
@@ -315,7 +315,7 @@ void AMazeSegment::GetAllTilesInSection(FIntPair StartPoint, TArray<FIntPair> & 
 			if (IsValidTileLocation(StartPoint.y + 1, StartPoint.x)) {
 				CopyRow[StartPoint.y + 1].Column[StartPoint.x] = ETileDesignation::TD_Visited;
 			}
-		} else if (StartDirection == EDirection::D_South && StartPoint.y < MazeLenghInTiles && CopyRow[StartPoint.y + 1].Column[StartPoint.x] == ETileDesignation::TD_Path) {
+		} else if (StartDirection == EDirection::D_South && StartPoint.y < MazeLengthInTiles && CopyRow[StartPoint.y + 1].Column[StartPoint.x] == ETileDesignation::TD_Path) {
 			if (IsValidTileLocation(StartPoint.y, StartPoint.x - 1)) {
 				CopyRow[StartPoint.y].Column[StartPoint.x - 1] = ETileDesignation::TD_Visited;
 			}
@@ -351,7 +351,7 @@ void AMazeSegment::GetAllTilesInSection(FIntPair StartPoint, TArray<FIntPair> & 
 			}
 
 			// Lower Neighbor
-			if (StackHead.y + 1 < MazeLenghInTiles && CopyRow[StackHead.y + 1].Column[StackHead.x] == ETileDesignation::TD_Path) {
+			if (StackHead.y + 1 < MazeLengthInTiles && CopyRow[StackHead.y + 1].Column[StackHead.x] == ETileDesignation::TD_Path) {
 				ValidNeighbors.Add(FIntPair(StackHead.x, StackHead.y + 1));
 			}
 
@@ -361,7 +361,7 @@ void AMazeSegment::GetAllTilesInSection(FIntPair StartPoint, TArray<FIntPair> & 
 			}
 
 			// Right Neighbor
-			if (StackHead.x + 1 < MazeLenghInTiles && CopyRow[StackHead.y].Column[StackHead.x + 1] == ETileDesignation::TD_Path) {
+			if (StackHead.x + 1 < MazeLengthInTiles && CopyRow[StackHead.y].Column[StackHead.x + 1] == ETileDesignation::TD_Path) {
 				ValidNeighbors.Add(FIntPair(StackHead.x + 1, StackHead.y));
 			}
 
@@ -404,7 +404,7 @@ void AMazeSegment::CreateRandomPathFromStartPoint(FIntPair StartPoint, TArray<FI
 			}
 
 			// Lower Neighbor
-			if (StackHead.y + 1 < MazeLenghInTiles && CopyRow[StackHead.y + 1].Column[StackHead.x] == ETileDesignation::TD_Path) {
+			if (StackHead.y + 1 < MazeLengthInTiles && CopyRow[StackHead.y + 1].Column[StackHead.x] == ETileDesignation::TD_Path) {
 				ValidNeighbors.Add(FIntPair(StackHead.x, StackHead.y + 1));
 			}
 
@@ -414,7 +414,7 @@ void AMazeSegment::CreateRandomPathFromStartPoint(FIntPair StartPoint, TArray<FI
 			}
 
 			// Right Neighbor
-			if (StackHead.x + 1 < MazeLenghInTiles && CopyRow[StackHead.y].Column[StackHead.x + 1] == ETileDesignation::TD_Path) {
+			if (StackHead.x + 1 < MazeLengthInTiles && CopyRow[StackHead.y].Column[StackHead.x + 1] == ETileDesignation::TD_Path) {
 				ValidNeighbors.Add(FIntPair(StackHead.x + 1, StackHead.y));
 			}
 
@@ -435,7 +435,70 @@ void AMazeSegment::CreateRandomPathFromStartPoint(FIntPair StartPoint, TArray<FI
 };
 
 bool AMazeSegment::IsValidTileLocation(int32 TileRow, int32 TileColumn) {
-	return TileColumn >= 0 && TileRow >= 0 && TileColumn < MazeLenghInTiles && TileRow < MazeLenghInTiles;
+	return TileColumn >= 0 && TileRow >= 0 && TileColumn < MazeLengthInTiles && TileRow < MazeLengthInTiles;
+}
+
+void AMazeSegment::SpawnWalls_Implementation() {
+	AActor* CurrentWall;
+	for (int y = 0; y < MazeLengthInTiles - 1; y++) {
+		for (int x = 0; x < MazeLengthInTiles - 1; x++) {
+			if (Row[y].Column[x] == ETileDesignation::TD_Wall) {
+				CurrentWall = GetWorld()->SpawnActor(WallClass);
+				CurrentWall->SetActorLocation(GetActorLocation() + FVector( (float)(x + 1) * TileSize, (float)(y + 1) * TileSize, FloorHeight ));
+				CurrentWall->SetActorScale3D(FVector(TileSize / 100.f, TileSize / 100.f, InnerWallHeight / 100.f));
+			}
+		}
+
+	}
+}
+
+void AMazeSegment::SpawnFloor_Implementation() {
+	AActor* Floor = GetWorld()->SpawnActor(FloorClass);
+	Floor->SetActorLocation(GetActorLocation());
+	Floor->SetActorScale3D(FVector((float)(MazeLengthInTiles + 2) * TileSize / 100.f, (float)(MazeLengthInTiles + 2) * TileSize / 100.f, FloorHeight / 100.f));
+
+}
+
+void AMazeSegment::SpawnBorders_Implementation() {
+	//Left Border
+	AActor* BorderWall = GetWorld()->SpawnActor(BorderClass);
+	BorderWall->SetActorLocation(GetActorLocation() + FVector(0.f, 0.f, FloorHeight));
+	BorderWall->SetActorScale3D(FVector(TileSize / 100.f, (float)((MazeLengthInTiles + 2) / 2) * TileSize / 100.f, OuterWallHeight / 100.f));
+
+	BorderWall = GetWorld()->SpawnActor(BorderClass);
+	BorderWall->SetActorLocation(GetActorLocation() + FVector(0.f, (float)((MazeLengthInTiles + 2) / 2 + 1) * TileSize, FloorHeight));
+	BorderWall->SetActorScale3D(FVector(TileSize / 100.f, (float)((MazeLengthInTiles + 2) / 2) * TileSize / 100.f, OuterWallHeight / 100.f));
+
+	//Right Border
+	BorderWall = GetWorld()->SpawnActor(BorderClass);
+	BorderWall->SetActorLocation(GetActorLocation() + FVector((float)(MazeLengthInTiles + 1) * TileSize, 0.f, FloorHeight));
+	BorderWall->SetActorScale3D(FVector(TileSize / 100.f, (float)((MazeLengthInTiles + 2) / 2) * TileSize / 100.f, OuterWallHeight / 100.f));
+
+	BorderWall = GetWorld()->SpawnActor(BorderClass);
+	BorderWall->SetActorLocation(GetActorLocation() + FVector((float)(MazeLengthInTiles + 1) * TileSize, (float)((MazeLengthInTiles + 2) / 2 + 1) * TileSize, FloorHeight));
+	BorderWall->SetActorScale3D(FVector(TileSize / 100.f, (float)((MazeLengthInTiles + 2) / 2) * TileSize / 100.f, OuterWallHeight / 100.f));
+
+	//Top Border
+	BorderWall = GetWorld()->SpawnActor(BorderClass);
+	BorderWall->SetActorLocation(GetActorLocation() + FVector(TileSize, 0.f, FloorHeight));
+	BorderWall->SetActorScale3D(FVector((float)(MazeLengthInTiles / 2) * TileSize / 100.f, TileSize / 100.f, OuterWallHeight / 100.f));
+
+	BorderWall = GetWorld()->SpawnActor(BorderClass);
+	BorderWall->SetActorLocation(GetActorLocation() + FVector((float)((MazeLengthInTiles + 2) / 2 + 1) * TileSize, 0.f, FloorHeight));
+	BorderWall->SetActorScale3D(FVector((float)(MazeLengthInTiles / 2) * TileSize / 100.f, TileSize / 100.f, OuterWallHeight / 100.f));
+
+	//Bottom Border
+	BorderWall = GetWorld()->SpawnActor(BorderClass);
+	BorderWall->SetActorLocation(GetActorLocation() + FVector(TileSize, (float)(MazeLengthInTiles + 1) * TileSize, FloorHeight));
+	BorderWall->SetActorScale3D(FVector((float)(MazeLengthInTiles / 2) * TileSize / 100.f, TileSize / 100.f, OuterWallHeight / 100.f));
+
+	BorderWall = GetWorld()->SpawnActor(BorderClass);
+	BorderWall->SetActorLocation(GetActorLocation() + FVector((float)((MazeLengthInTiles + 2) / 2 + 1) * TileSize, (float)(MazeLengthInTiles + 1) * TileSize, FloorHeight));
+	BorderWall->SetActorScale3D(FVector((float)(MazeLengthInTiles / 2) * TileSize / 100.f, TileSize / 100.f, OuterWallHeight / 100.f));
+
+
+
+
 }
 
 // uint8 test = (uint8)ETileDesignation::TD_Cell;
@@ -444,7 +507,7 @@ bool AMazeSegment::IsValidTileLocation(int32 TileRow, int32 TileColumn) {
 ////FText testText = FText::FromString(testString);
 
 //TArray<ETileDesignation> testArray;
-//for (int index = 0; index < MazeLenghInTiles; index++) {
+//for (int index = 0; index < MazeLengthInTiles; index++) {
 //	if (index % 2 == 1) {
 //		testArray.Add(ETileDesignation::TD_Wall);
 //	}

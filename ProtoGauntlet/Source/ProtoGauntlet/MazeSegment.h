@@ -18,7 +18,7 @@ public:
 
 	/** Only odd values. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dimensions")
-	int32 MazeLenghInTiles;
+	int32 MazeLengthInTiles;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dimensions")
 	float TileSize;
@@ -41,7 +41,7 @@ public:
 	// Sets default values for this actor's properties
 	AMazeSegment();
 
-	void ChangeMazeParameters(int32 MazeLenghInTiles, float TileSize, float FloorHeight, float InnerWallHeight, float OuterWallHeight);
+	void ChangeMazeParameters(int32 MazeLengthInTiles, float TileSize, float FloorHeight, float InnerWallHeight, float OuterWallHeight);
 
 	bool IsValidTileLocation(int32 TileRow, int32 TileColumn);
 
@@ -69,17 +69,26 @@ public:
 
 protected:
 
-	void CreateMazeLayout();
+	virtual void CreateMazeLayout();
 
-	UFUNCTION(BlueprintImplementableEvent, Category = "Dimensions")
+	UFUNCTION(BlueprintNativeEvent, Category = "Dimensions")
 	void SpawnWalls();
 	
-	UFUNCTION(BlueprintImplementableEvent, Category = "Dimensions")
+	UFUNCTION(BlueprintNativeEvent, Category = "Dimensions")
 	void SpawnFloor();
 
-	UFUNCTION(BlueprintImplementableEvent, Category = "Dimensions")
+	UFUNCTION(BlueprintNativeEvent, Category = "Dimensions")
 	void SpawnBorders();
 
 	void CalculateValues();
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<AActor> FloorClass;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<AActor> BorderClass;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<AActor> WallClass;
 	
 };

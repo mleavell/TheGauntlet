@@ -14,7 +14,7 @@ AMegaMaze::AMegaMaze()
 	WidthInMazeSegments = 3;
 	HeightInMazeSegments = 3;
 	TileSize = 400.f;
-	MazeLenghInTiles = 41;
+	MazeLengthInTiles = 41;
 	FloorHeight = 100.f;
 	InnerWallHeight = 600.f;
 	OuterWallHeight = 800.f;
@@ -34,10 +34,10 @@ void AMegaMaze::BeginPlay()
 		{
 			for (int32 x = 0; x < WidthInMazeSegments; x++)
 			{
-				SegmentLocation = GetActorLocation() + FVector((float)((MazeLenghInTiles + 2) * x) * TileSize, (float)((MazeLenghInTiles + 2) * y) * TileSize, 0.f);
+				SegmentLocation = GetActorLocation() + FVector((float)((MazeLengthInTiles + 2) * x) * TileSize, (float)((MazeLengthInTiles + 2) * y) * TileSize, 0.f);
 				CurrentSegment = World->SpawnActor<AMazeSegment>(MazeSegmentClass);
 				CurrentSegment->SetActorLocation(SegmentLocation, false);
-				CurrentSegment->ChangeMazeParameters(MazeLenghInTiles, TileSize, FloorHeight, InnerWallHeight, OuterWallHeight);
+				CurrentSegment->ChangeMazeParameters(MazeLengthInTiles, TileSize, FloorHeight, InnerWallHeight, OuterWallHeight);
 				if (WidthInMazeSegments / 2 == x && HeightInMazeSegments / 2 == y)
 				{
 					(*CurrentSegment).IsCenterPiece = true;
@@ -50,8 +50,8 @@ void AMegaMaze::BeginPlay()
 
 void AMegaMaze::CalculateValues()
 {
-	if (MazeLenghInTiles % 2 == 0) {
-		MazeLenghInTiles++;
+	if (MazeLengthInTiles % 2 == 0) {
+		MazeLengthInTiles++;
 	}
 
 	if (WidthInMazeSegments % 2 == 0) {

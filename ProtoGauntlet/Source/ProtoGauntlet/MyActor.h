@@ -3,6 +3,7 @@
 #pragma once
 
 #include "GameFramework/Actor.h"
+#include "MazeWall.h"
 #include "MyActor.generated.h"
 
 UENUM(BlueprintType)
@@ -32,6 +33,9 @@ struct FMazeRowData
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Maze Row Data")
 	TArray<ETileDesignation> Column;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Maze Row Data")
+	TArray<AMazeWall*> ColumnWallRef;
 };
 
 USTRUCT(BlueprintType)
@@ -43,7 +47,7 @@ struct FIntPair
 	int32 x;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Int Pair")
-		int32 y;
+	int32 y;
 
 	FIntPair()
 	{

@@ -89,6 +89,6 @@ protected:
 	TSubclassOf<AActor> BorderClass;
 
 	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<AActor> WallClass;
+	TSubclassOf<AMazeWall> WallClass;
 	
 };

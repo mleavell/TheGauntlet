@@ -49,7 +49,7 @@ void AMazeSegment::BeginPlay()
 	Super::BeginPlay();
 	SpawnFloor();
 	SpawnBorders();
-	this->CreateMazeLayout();
+	CreateMazeLayout();
 
 	if (!IsCenterPiece) {
 		SpawnWalls();
@@ -439,13 +439,17 @@ bool AMazeSegment::IsValidTileLocation(int32 TileRow, int32 TileColumn) {
 }
 
 void AMazeSegment::SpawnWalls_Implementation() {
-	AActor* CurrentWall;
+	AMazeWall* CurrentWall;
 	for (int y = 0; y < MazeLengthInTiles - 1; y++) {
+		Row[y].ColumnWallRef.SetNum(41);
 		for (int x = 0; x < MazeLengthInTiles - 1; x++) {
 			if (Row[y].Column[x] == ETileDesignation::TD_Wall) {
-				CurrentWall = GetWorld()->SpawnActor(WallClass);
-				CurrentWall->SetActorLocation(GetActorLocation() + FVector( (float)(x + 1) * TileSize, (float)(y + 1) * TileSize, FloorHeight ));
-				CurrentWall->SetActorScale3D(FVector(TileSize / 100.f, TileSize / 100.f, InnerWallHeight / 100.f));
+				CurrentWall = Cast<AMazeWall>(GetWorld()->SpawnActor(WallClass));
+				if (CurrentWall) {
+					CurrentWall->SetActorLocation(GetActorLocation() + FVector((float)(x + 1) * TileSize, (float)(y + 1) * TileSize, FloorHeight));
+					CurrentWall->SetActorScale3D(FVector(TileSize / 100.f, TileSize / 100.f, InnerWallHeight / 100.f));
+					Row[y].ColumnWallRef[x] = CurrentWall;
+				}
 			}
 		}
 

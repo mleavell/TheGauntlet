@@ -71,14 +71,11 @@ protected:
 
 	virtual void CreateMazeLayout();
 
-	UFUNCTION(BlueprintNativeEvent, Category = "Dimensions")
-	void SpawnWalls();
+	virtual void SpawnWalls();
 	
-	UFUNCTION(BlueprintNativeEvent, Category = "Dimensions")
-	void SpawnFloor();
+	virtual void SpawnFloor();
 
-	UFUNCTION(BlueprintNativeEvent, Category = "Dimensions")
-	void SpawnBorders();
+	virtual void SpawnBorders();
 
 	void CalculateValues();
 

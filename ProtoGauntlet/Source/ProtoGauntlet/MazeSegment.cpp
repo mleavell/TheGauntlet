@@ -438,15 +438,16 @@ bool AMazeSegment::IsValidTileLocation(int32 TileRow, int32 TileColumn) {
 	return TileColumn >= 0 && TileRow >= 0 && TileColumn < MazeLengthInTiles && TileRow < MazeLengthInTiles;
 }
 
-void AMazeSegment::SpawnWalls_Implementation() {
+void AMazeSegment::SpawnWalls() {
 	AMazeWall* CurrentWall;
-	for (int y = 0; y < MazeLengthInTiles - 1; y++) {
-		Row[y].ColumnWallRef.SetNum(41);
-		for (int x = 0; x < MazeLengthInTiles - 1; x++) {
+	float VisibilityOffset = 0.1f; // Keeps the ground from clipping with lowered walls
+	for (int y = 0; y < MazeLengthInTiles; y++) {
+		Row[y].ColumnWallRef.SetNum(MazeLengthInTiles);
+		for (int x = 0; x < MazeLengthInTiles; x++) {
 			if (Row[y].Column[x] == ETileDesignation::TD_Wall) {
 				CurrentWall = Cast<AMazeWall>(GetWorld()->SpawnActor(WallClass));
 				if (CurrentWall) {
-					CurrentWall->SetActorLocation(GetActorLocation() + FVector((float)(x + 1) * TileSize, (float)(y + 1) * TileSize, FloorHeight));
+					CurrentWall->SetActorLocation(GetActorLocation() + FVector((float)(x + 1) * TileSize, (float)(y + 1) * TileSize, FloorHeight - VisibilityOffset));
 					CurrentWall->SetActorScale3D(FVector(TileSize / 100.f, TileSize / 100.f, InnerWallHeight / 100.f));
 					Row[y].ColumnWallRef[x] = CurrentWall;
 				}
@@ -456,14 +457,14 @@ void AMazeSegment::SpawnWalls_Implementation() {
 	}
 }
 
-void AMazeSegment::SpawnFloor_Implementation() {
+void AMazeSegment::SpawnFloor() {
 	AActor* Floor = GetWorld()->SpawnActor(FloorClass);
 	Floor->SetActorLocation(GetActorLocation());
 	Floor->SetActorScale3D(FVector((float)(MazeLengthInTiles + 2) * TileSize / 100.f, (float)(MazeLengthInTiles + 2) * TileSize / 100.f, FloorHeight / 100.f));
 
 }
 
-void AMazeSegment::SpawnBorders_Implementation() {
+void AMazeSegment::SpawnBorders() {
 	//Left Border
 	AActor* BorderWall = GetWorld()->SpawnActor(BorderClass);
 	BorderWall->SetActorLocation(GetActorLocation() + FVector(0.f, 0.f, FloorHeight));

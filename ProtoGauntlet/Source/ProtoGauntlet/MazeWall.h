@@ -32,11 +32,16 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "Raise and Lower")
 	void RaiseOnTimer(float RaisedTime);
 
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "Raise and Lower")
+	void RaiseAndLower(bool Deadly = true);
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "Raise and Lower")
+	void LowerAndRaise();
+
 	UPROPERTY(BlueprintReadWrite, Category = "Raise and Lower")
 	bool LowerEnabled;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Raise and Lower")
 	bool RaiseEnabled;
-
 	
 };

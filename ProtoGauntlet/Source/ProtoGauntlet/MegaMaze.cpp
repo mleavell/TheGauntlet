@@ -40,7 +40,7 @@ void AMegaMaze::BeginPlay()
 				CurrentSegment->ChangeMazeParameters(MazeLengthInTiles, TileSize, FloorHeight, InnerWallHeight, OuterWallHeight);
 				if (WidthInMazeSegments / 2 == x && HeightInMazeSegments / 2 == y)
 				{
-					(*CurrentSegment).IsCenterPiece = true;
+					//(*CurrentSegment).IsCenterPiece = true;
 				}
 				//World->SpawnActor<AMyProjectProjectile>(ProjectileClass, SpawnLocation, SpawnRotation);
 			}

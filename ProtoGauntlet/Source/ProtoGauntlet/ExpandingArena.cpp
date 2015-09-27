@@ -5,12 +5,12 @@
 
 AExpandingArena::AExpandingArena() {
 	DesiredLayerOfWallsLowered = 3;
-
 }
 
 void AExpandingArena::BeginPlay() {
 	Super::BeginPlay();
 
+	PathfindingActive = true;
 	FTimerHandle LayerTimer;
 	if (DesiredLayerOfWallsLowered > CurrentLayerOfWallsLowered) {
 		GetWorldTimerManager().SetTimer(LayerTimer, this, &AExpandingArena::LowerLayerOfWalls, 0.1f, false);

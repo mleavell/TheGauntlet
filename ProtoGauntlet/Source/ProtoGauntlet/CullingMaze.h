@@ -15,6 +15,8 @@ class PROTOGAUNTLET_API ACullingMaze : public AMazeSegment
 
 		//void CreateMazeLayout();
 protected:
+	
+	virtual void BeginPlay() override;
 
 	void InitialPillarRaise();
 	

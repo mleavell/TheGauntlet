@@ -3,6 +3,12 @@
 #include "ProtoGauntlet.h"
 #include "CullingMaze.h"
 
+void ACullingMaze::BeginPlay() {
+	Super::BeginPlay();
+
+	PathfindingActive = false;
+}
+
 void ACullingMaze::SpawnWalls() {
 	AMazeWall* CurrentWall;
 	PillarLayers = (MazeLengthInTiles - 5) / 8 + 1;

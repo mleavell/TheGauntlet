@@ -25,6 +25,8 @@ void AShapeshifterMaze::SpawnWalls() {
 
 void AShapeshifterMaze::BeginPlay() {
 	Super::BeginPlay();
+
+	PathfindingActive = false;
 	FTimerHandle ShapeshiftTimer;
 	GetWorldTimerManager().SetTimer(ShapeshiftTimer, this, &AShapeshifterMaze::Shapeshift, ShapeshiftDelay, false);
 }

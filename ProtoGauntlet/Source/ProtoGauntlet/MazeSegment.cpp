@@ -54,6 +54,8 @@ void AMazeSegment::BeginPlay()
 	if (!IsCenterPiece) {
 		SpawnWalls();
 	}
+
+	PathfindingActive = true;
 	
 	
 
@@ -182,8 +184,8 @@ ETileDesignation AMazeSegment::GetTileDesignationAt(int32 TileRow, int32 TileCol
 	return ETileDesignation::TD_OutOfBounds;
 }
 
-void AMazeSegment::FindPathBetweenPoints(FIntPair StartPoint, FIntPair EndPoint, TArray<FIntPair> & Result, EDirection StartDirection) {
-	if (IsValidTileLocation(StartPoint.y, StartPoint.x) && Row[StartPoint.y].Column[StartPoint.x] != ETileDesignation::TD_Wall && Row[EndPoint.y].Column[EndPoint.x] != ETileDesignation::TD_Wall) {
+void AMazeSegment::FindPathBetweenPoints(FIntPair StartPoint, FIntPair EndPoint, TArray<FIntPair> & Path, EDirection StartDirection) {
+	if (IsValidTileLocation(StartPoint.y, StartPoint.x) ){//&& Row[StartPoint.y].Column[StartPoint.x] != ETileDesignation::TD_Wall && Row[EndPoint.y].Column[EndPoint.x] != ETileDesignation::TD_Wall) {
 		TArray<FMazeRowData> CopyRow;
 		/*for (auto& ColumnData : Row) {
 			CopyRow.Emplace(ColumnData);
@@ -191,7 +193,7 @@ void AMazeSegment::FindPathBetweenPoints(FIntPair StartPoint, FIntPair EndPoint,
 		}*/
 		CopyRow.Append(Row);
 		CopyRow[StartPoint.y].Column[StartPoint.x] = ETileDesignation::TD_Visited;
-		Result.Add(StartPoint);
+		Path.Add(StartPoint);
 
 		if (StartDirection != EDirection::D_None) {
 			if (StartDirection == EDirection::D_North && StartPoint.y > 0 && CopyRow[StartPoint.y - 1].Column[StartPoint.x] == ETileDesignation::TD_Path) {
@@ -204,8 +206,8 @@ void AMazeSegment::FindPathBetweenPoints(FIntPair StartPoint, FIntPair EndPoint,
 				if (IsValidTileLocation(StartPoint.y + 1, StartPoint.x)) {
 					CopyRow[StartPoint.y + 1].Column[StartPoint.x] = ETileDesignation::TD_Visited;
 				}
-			}
-			else if (StartDirection == EDirection::D_East && StartPoint.x < MazeLengthInTiles && CopyRow[StartPoint.y].Column[StartPoint.x + 1] == ETileDesignation::TD_Path) {
+
+			} else if (StartDirection == EDirection::D_East && StartPoint.x < MazeLengthInTiles && CopyRow[StartPoint.y].Column[StartPoint.x + 1] == ETileDesignation::TD_Path) {
 				if (IsValidTileLocation(StartPoint.y, StartPoint.x - 1)) {
 					CopyRow[StartPoint.y].Column[StartPoint.x - 1] = ETileDesignation::TD_Visited;
 				}
@@ -215,8 +217,8 @@ void AMazeSegment::FindPathBetweenPoints(FIntPair StartPoint, FIntPair EndPoint,
 				if (IsValidTileLocation(StartPoint.y + 1, StartPoint.x)) {
 					CopyRow[StartPoint.y + 1].Column[StartPoint.x] = ETileDesignation::TD_Visited;
 				}
-			}
-			else if (StartDirection == EDirection::D_South && StartPoint.y < MazeLengthInTiles && CopyRow[StartPoint.y + 1].Column[StartPoint.x] == ETileDesignation::TD_Path) {
+
+			} else if (StartDirection == EDirection::D_South && StartPoint.y < MazeLengthInTiles && CopyRow[StartPoint.y + 1].Column[StartPoint.x] == ETileDesignation::TD_Path) {
 				if (IsValidTileLocation(StartPoint.y, StartPoint.x - 1)) {
 					CopyRow[StartPoint.y].Column[StartPoint.x - 1] = ETileDesignation::TD_Visited;
 				}
@@ -226,8 +228,8 @@ void AMazeSegment::FindPathBetweenPoints(FIntPair StartPoint, FIntPair EndPoint,
 				if (IsValidTileLocation(StartPoint.y - 1, StartPoint.x)) {
 					CopyRow[StartPoint.y - 1].Column[StartPoint.x] = ETileDesignation::TD_Visited;
 				}
-			}
-			else if (StartDirection == EDirection::D_West && StartPoint.x > 0 && CopyRow[StartPoint.y].Column[StartPoint.x - 1] == ETileDesignation::TD_Path) {
+
+			} else if (StartDirection == EDirection::D_West && StartPoint.x > 0 && CopyRow[StartPoint.y].Column[StartPoint.x - 1] == ETileDesignation::TD_Path) {
 				if (IsValidTileLocation(StartPoint.y, StartPoint.x + 1)) {
 					CopyRow[StartPoint.y].Column[StartPoint.x + 1] = ETileDesignation::TD_Visited;
 				}
@@ -237,14 +239,15 @@ void AMazeSegment::FindPathBetweenPoints(FIntPair StartPoint, FIntPair EndPoint,
 				if (IsValidTileLocation(StartPoint.y + 1, StartPoint.x)) {
 					CopyRow[StartPoint.y + 1].Column[StartPoint.x] = ETileDesignation::TD_Visited;
 				}
+
 			} else {
-				Result.Pop();
+				Path.Pop();
 			}
 		}
 		
 		TArray<FIntPair> ValidNeighbors;
 		FIntPair StackHead = StartPoint;
-		while (Result.Num() != 0 && Result.Last() != EndPoint) {
+		while (Path.Num() != 0 && Path.Last() != EndPoint) {
 			ValidNeighbors.SetNum(0);
 
 			// Upper Neighbor
@@ -271,11 +274,11 @@ void AMazeSegment::FindPathBetweenPoints(FIntPair StartPoint, FIntPair EndPoint,
 				// Choose random valid neighbor
 				StackHead = ValidNeighbors[FMath::RandRange(0, ValidNeighbors.Num() - 1)];
 				CopyRow[StackHead.y].Column[StackHead.x] = ETileDesignation::TD_Visited;
-				Result.Push(StackHead);
+				Path.Push(StackHead);
 			} else {
-				Result.Pop();
-				if (Result.Num() != 0) {
-					StackHead = Result.Last();
+				Path.Pop();
+				if (Path.Num() != 0) {
+					StackHead = Path.Last();
 				}
 			}
 		}
@@ -283,7 +286,8 @@ void AMazeSegment::FindPathBetweenPoints(FIntPair StartPoint, FIntPair EndPoint,
 };
 
 void AMazeSegment::GetAllTilesInSection(FIntPair StartPoint, TArray<FIntPair> & Result, EDirection StartDirection) {
-	if (IsValidTileLocation(StartPoint.y, StartPoint.x) && Row[StartPoint.y].Column[StartPoint.x] != ETileDesignation::TD_Wall) {
+	if (IsValidTileLocation(StartPoint.y, StartPoint.x) &&
+		Row[StartPoint.y].Column[StartPoint.x] != ETileDesignation::TD_Wall) {
 		TArray<FMazeRowData> CopyRow;
 		/*for (auto& ColumnData : Row) {
 		CopyRow.Emplace(ColumnData);
@@ -436,6 +440,151 @@ void AMazeSegment::CreateRandomPathFromStartPoint(FIntPair StartPoint, TArray<FI
 
 bool AMazeSegment::IsValidTileLocation(int32 TileRow, int32 TileColumn) {
 	return TileColumn >= 0 && TileRow >= 0 && TileColumn < MazeLengthInTiles && TileRow < MazeLengthInTiles;
+}
+
+bool AMazeSegment::IsIntersection(int32 TileRow, int32 TileColumn) {
+	bool Result = false;
+	if (IsValidTileLocation(TileRow, TileColumn)) {
+		int32 ValidNeighbors = 0;
+
+		if (IsValidTileLocation(TileRow - 1, TileColumn) && 
+			Row[TileRow - 1].Column[TileColumn] == ETileDesignation::TD_Path ) {
+			ValidNeighbors++;
+		}
+
+		if (IsValidTileLocation(TileRow + 1, TileColumn) &&
+			Row[TileRow + 1].Column[TileColumn] == ETileDesignation::TD_Path) {
+			ValidNeighbors++;
+		}
+
+		if (IsValidTileLocation(TileRow, TileColumn - 1) &&
+			Row[TileRow].Column[TileColumn - 1] == ETileDesignation::TD_Path) {
+			ValidNeighbors++;
+		}
+
+		if (IsValidTileLocation(TileRow, TileColumn + 1) &&
+			Row[TileRow].Column[TileColumn + 1] == ETileDesignation::TD_Path) {
+			ValidNeighbors++;
+		}
+
+		if (ValidNeighbors >= 3) {
+			Result = true;
+		}
+	}
+	return Result;
+
+}
+
+void AMazeSegment::NextIntersection(FIntPair StartPoint, FIntPair & Intersection, EDirection StartDirection, int32 MaxDistance) {
+	if (IsValidTileLocation(StartPoint.y, StartPoint.x) &&
+		Row[StartPoint.y].Column[StartPoint.x] != ETileDesignation::TD_Wall) {
+		if (!IsIntersection(StartPoint.y, StartPoint.x)) {
+			TArray<FMazeRowData> CopyRow;
+			CopyRow.Append(Row);
+			CopyRow[StartPoint.y].Column[StartPoint.x] = ETileDesignation::TD_Visited;
+			TArray<FIntPair> PathStack;
+			PathStack.Add(StartPoint);
+
+			if (StartDirection == EDirection::D_North && StartPoint.y > 0 && CopyRow[StartPoint.y - 1].Column[StartPoint.x] == ETileDesignation::TD_Path) {
+				if (IsValidTileLocation(StartPoint.y, StartPoint.x - 1)) {
+					CopyRow[StartPoint.y].Column[StartPoint.x - 1] = ETileDesignation::TD_Visited;
+				}
+				if (IsValidTileLocation(StartPoint.y, StartPoint.x + 1)) {
+					CopyRow[StartPoint.y].Column[StartPoint.x + 1] = ETileDesignation::TD_Visited;
+				}
+				if (IsValidTileLocation(StartPoint.y + 1, StartPoint.x)) {
+					CopyRow[StartPoint.y + 1].Column[StartPoint.x] = ETileDesignation::TD_Visited;
+				}
+			}
+			else if (StartDirection == EDirection::D_East && StartPoint.x < MazeLengthInTiles && CopyRow[StartPoint.y].Column[StartPoint.x + 1] == ETileDesignation::TD_Path) {
+				if (IsValidTileLocation(StartPoint.y, StartPoint.x - 1)) {
+					CopyRow[StartPoint.y].Column[StartPoint.x - 1] = ETileDesignation::TD_Visited;
+				}
+				if (IsValidTileLocation(StartPoint.y - 1, StartPoint.x)) {
+					CopyRow[StartPoint.y - 1].Column[StartPoint.x] = ETileDesignation::TD_Visited;
+				}
+				if (IsValidTileLocation(StartPoint.y + 1, StartPoint.x)) {
+					CopyRow[StartPoint.y + 1].Column[StartPoint.x] = ETileDesignation::TD_Visited;
+				}
+			}
+			else if (StartDirection == EDirection::D_South && StartPoint.y < MazeLengthInTiles && CopyRow[StartPoint.y + 1].Column[StartPoint.x] == ETileDesignation::TD_Path) {
+				if (IsValidTileLocation(StartPoint.y, StartPoint.x - 1)) {
+					CopyRow[StartPoint.y].Column[StartPoint.x - 1] = ETileDesignation::TD_Visited;
+				}
+				if (IsValidTileLocation(StartPoint.y, StartPoint.x + 1)) {
+					CopyRow[StartPoint.y].Column[StartPoint.x + 1] = ETileDesignation::TD_Visited;
+				}
+				if (IsValidTileLocation(StartPoint.y - 1, StartPoint.x)) {
+					CopyRow[StartPoint.y - 1].Column[StartPoint.x] = ETileDesignation::TD_Visited;
+				}
+			}
+			else if (StartDirection == EDirection::D_West && StartPoint.x > 0 && CopyRow[StartPoint.y].Column[StartPoint.x - 1] == ETileDesignation::TD_Path) {
+				if (IsValidTileLocation(StartPoint.y, StartPoint.x + 1)) {
+					CopyRow[StartPoint.y].Column[StartPoint.x + 1] = ETileDesignation::TD_Visited;
+				}
+				if (IsValidTileLocation(StartPoint.y - 1, StartPoint.x)) {
+					CopyRow[StartPoint.y - 1].Column[StartPoint.x] = ETileDesignation::TD_Visited;
+				}
+				if (IsValidTileLocation(StartPoint.y + 1, StartPoint.x)) {
+					CopyRow[StartPoint.y + 1].Column[StartPoint.x] = ETileDesignation::TD_Visited;
+				}
+			}
+			else {
+				PathStack.Pop();
+
+			}
+
+			TArray<FIntPair> ValidNeighbors;
+			FIntPair StackHead = StartPoint;
+			while (PathStack.Num() != 0 &&
+				(PathStack.Num() - 2 > MaxDistance || !IsIntersection(StackHead.y, StackHead.x))) {
+				ValidNeighbors.SetNum(0);
+
+				// Upper Neighbor
+				if (StackHead.y - 1 >= 0 && CopyRow[StackHead.y - 1].Column[StackHead.x] == ETileDesignation::TD_Path) {
+					ValidNeighbors.Add(FIntPair(StackHead.x, StackHead.y - 1));
+				}
+
+				// Lower Neighbor
+				if (StackHead.y + 1 < MazeLengthInTiles && CopyRow[StackHead.y + 1].Column[StackHead.x] == ETileDesignation::TD_Path) {
+					ValidNeighbors.Add(FIntPair(StackHead.x, StackHead.y + 1));
+				}
+
+				// Left Neighbor
+				if (StackHead.x - 1 >= 0 && CopyRow[StackHead.y].Column[StackHead.x - 1] == ETileDesignation::TD_Path) {
+					ValidNeighbors.Add(FIntPair(StackHead.x - 1, StackHead.y));
+				}
+
+				// Right Neighbor
+				if (StackHead.x + 1 < MazeLengthInTiles && CopyRow[StackHead.y].Column[StackHead.x + 1] == ETileDesignation::TD_Path) {
+					ValidNeighbors.Add(FIntPair(StackHead.x + 1, StackHead.y));
+				}
+
+				if (ValidNeighbors.Num() != 0) {
+					// Choose random valid neighbor
+					StackHead = ValidNeighbors[FMath::RandRange(0, ValidNeighbors.Num() - 1)];
+					CopyRow[StackHead.y].Column[StackHead.x] = ETileDesignation::TD_Visited;
+					PathStack.Push(StackHead);
+				}
+				else {
+					PathStack.Pop();
+					if (PathStack.Num() != 0) {
+						StackHead = PathStack.Last();
+					}
+				}
+			}
+
+			if (PathStack.Num() == 0) {
+				Intersection = FIntPair(-1, -1);
+			} else {
+				Intersection = PathStack.Last();
+			}
+
+		} else {
+			Intersection = StartPoint;
+
+		}
+	}
 }
 
 void AMazeSegment::SpawnWalls() {

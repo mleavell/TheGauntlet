@@ -16,6 +16,7 @@ void AAscensionMaze::CreateMazeLayout() {
 void AAscensionMaze::BeginPlay() {
 	Super::BeginPlay();
 
+	PathfindingActive = false;
 	FTimerHandle LayerTimer;
 	GetWorldTimerManager().SetTimer(LayerTimer, this, &AAscensionMaze::Descend, 0.1f, false);
 

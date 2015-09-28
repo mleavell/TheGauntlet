@@ -438,10 +438,6 @@ void AMazeSegment::CreateRandomPathFromStartPoint(FIntPair StartPoint, TArray<FI
 	}
 };
 
-bool AMazeSegment::IsValidTileLocation(int32 TileRow, int32 TileColumn) {
-	return TileColumn >= 0 && TileRow >= 0 && TileColumn < MazeLengthInTiles && TileRow < MazeLengthInTiles;
-}
-
 bool AMazeSegment::IsIntersection(int32 TileRow, int32 TileColumn) {
 	bool Result = false;
 	if (IsValidTileLocation(TileRow, TileColumn)) {
@@ -473,6 +469,10 @@ bool AMazeSegment::IsIntersection(int32 TileRow, int32 TileColumn) {
 	}
 	return Result;
 
+}
+
+bool AMazeSegment::IsValidTileLocation(int32 TileRow, int32 TileColumn) {
+	return TileColumn >= 0 && TileRow >= 0 && TileColumn < MazeLengthInTiles && TileRow < MazeLengthInTiles;
 }
 
 void AMazeSegment::NextIntersection(FIntPair StartPoint, FIntPair & Intersection, EDirection StartDirection, int32 MaxDistance) {
@@ -585,6 +585,21 @@ void AMazeSegment::NextIntersection(FIntPair StartPoint, FIntPair & Intersection
 
 		}
 	}
+}
+
+bool AMazeSegment::GetPathfindingActive() {
+	return PathfindingActive;
+}
+
+void AMazeSegment::GetTileIndexAtLocation(FVector Location, int32 & TileRow, int32 & TileColumn) {
+	FVector AdjustedLocation = Location - GetActorLocation();
+	AdjustedLocation /= TileSize;
+	TileColumn = FGenericPlatformMath::FloorToInt(AdjustedLocation.X) - 1;
+	TileRow = FGenericPlatformMath::FloorToInt(AdjustedLocation.Y) - 1;
+}
+
+void AMazeSegment::GetLocationOfTile(FVector & Location, int32 TileRow, int32 TileColumn) {
+	Location = FVector((TileColumn + 1) * TileSize, (TileRow + 1) * TileSize, FloorHeight);
 }
 
 void AMazeSegment::SpawnWalls() {

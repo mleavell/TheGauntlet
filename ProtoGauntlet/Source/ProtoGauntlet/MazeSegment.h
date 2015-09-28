@@ -35,8 +35,17 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
 		void CreateRandomPathFromStartPoint(FIntPair StartPoint, TArray<FIntPair> & Result, int32 PathLength = 10);
 
-	UFUNCTION(BlueprintCallable, Category = "Dimensions")
+	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
 	ETileDesignation GetTileDesignationAt(int32 TileRow, int32 TileColumn);
+
+	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
+	virtual void GetTileIndexAtLocation(FVector Location, int32 & TileRow, int32 & TileColumn);
+
+	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
+	virtual void GetLocationOfTile(FVector & Location, int32 TileRow, int32 TileColumn);
+
+	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
+	bool GetPathfindingActive();
 
 protected:
 	UPROPERTY(EditDefaultsOnly)

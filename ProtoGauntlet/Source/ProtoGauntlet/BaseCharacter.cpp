@@ -44,6 +44,31 @@ void ABaseCharacter::BeginPlay()
 	
 }
 
+
+EDirection ABaseCharacter::GetCharacterDirection() {
+	EDirection CharacterDirection;
+	FRotator AdjustedRotation = GetActorRotation() + FRotator(0.f, 135.f, 0.f);
+	AdjustedRotation.Yaw = AdjustedRotation.Yaw > 0.f ? AdjustedRotation.Yaw : AdjustedRotation.Yaw + 360.f;
+	int32 Quadrant = FGenericPlatformMath::FloorToInt(AdjustedRotation.Yaw / 90.f);
+	if (Quadrant == 0) {
+		CharacterDirection = EDirection::D_North;
+
+	} else if (Quadrant == 1) {
+		CharacterDirection = EDirection::D_East;
+
+	} else if (Quadrant == 2) {
+		CharacterDirection = EDirection::D_South;
+
+	} else if (Quadrant == 3) {
+		CharacterDirection = EDirection::D_West;
+
+	} else {
+		CharacterDirection = EDirection::D_None;
+	}
+
+	return CharacterDirection;
+}
+
 // Called to bind functionality to input
 void ABaseCharacter::SetupPlayerInputComponent(class UInputComponent* InputComponent)
 {

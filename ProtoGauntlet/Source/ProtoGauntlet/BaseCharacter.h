@@ -3,6 +3,7 @@
 #pragma once
 
 #include "GameFramework/Character.h"
+#include "MyActor.h"
 #include "BaseCharacter.generated.h"
 
 UCLASS()
@@ -49,6 +50,9 @@ public:
 	/** AnimMontage to play each time we fire */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	class UAnimMontage* FireAnimation;
+
+	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
+	EDirection GetCharacterDirection();
 
 protected:
 

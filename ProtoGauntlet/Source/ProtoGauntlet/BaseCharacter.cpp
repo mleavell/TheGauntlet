@@ -37,6 +37,16 @@ ABaseCharacter::ABaseCharacter()
 	// derived blueprint asset named MyCharacter (to avoid direct content references in C++)
 }
 
+bool ABaseCharacter::OutputTestData(FString PlayerClass, FString Start, FString End, FString LinearDistance, FString AbilityUsageCount, FString EstimatedDistanceTraveled, FString CompletionTime) {
+	std::ofstream OutputData("C:\\Users\\Maurice\\Documents\\BeginnerData.csv", std::ios_base::app);
+	bool ReturnValue = OutputData.is_open();
+	FString FinalData = PlayerClass + "," + Start + "," + End + "," + LinearDistance + "," + AbilityUsageCount + "," + EstimatedDistanceTraveled + "," + CompletionTime;
+	std::string FinalDataString(TCHAR_TO_UTF8(*FinalData));
+	OutputData << FinalDataString << std::endl;
+	OutputData.close();
+	return ReturnValue;
+}
+
 // Called when the game starts or when spawned
 void ABaseCharacter::BeginPlay()
 {

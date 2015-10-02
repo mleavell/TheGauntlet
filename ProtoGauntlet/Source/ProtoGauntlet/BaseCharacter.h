@@ -4,6 +4,9 @@
 
 #include "GameFramework/Character.h"
 #include "MyActor.h"
+#include <iostream>
+#include <fstream>
+#include <string>
 #include "BaseCharacter.generated.h"
 
 UCLASS()
@@ -53,6 +56,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
 	EDirection GetCharacterDirection();
+
+	UFUNCTION(BlueprintCallable, Category = "Output")
+	bool OutputTestData(FString PlayerClass, FString Start, FString End, FString LinearDistance, FString AbilityUsageCount, FString EstimatedDistanceTraveled, FString CompletionTime);
 
 protected:
 

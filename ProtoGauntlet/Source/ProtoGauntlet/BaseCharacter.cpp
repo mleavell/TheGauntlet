@@ -139,7 +139,7 @@ void ABaseCharacter::OnFire()
 
 void ABaseCharacter::MoveForward(float Value)
 {
-	if (Value != 0.0f)
+	if (Value != 0.0f && !GetWorld()->GetFirstPlayerController()->bShowMouseCursor)
 	{
 		// add movement in that direction
 		AddMovementInput(GetActorForwardVector(), Value);
@@ -148,7 +148,7 @@ void ABaseCharacter::MoveForward(float Value)
 
 void ABaseCharacter::MoveRight(float Value)
 {
-	if (Value != 0.0f)
+	if (Value != 0.0f && !GetWorld()->GetFirstPlayerController()->bShowMouseCursor)
 	{
 		// add movement in that direction
 		AddMovementInput(GetActorRightVector(), Value);

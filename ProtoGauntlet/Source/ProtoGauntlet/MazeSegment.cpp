@@ -485,7 +485,7 @@ void AMazeSegment::NextIntersection(FIntPair StartPoint, FIntPair & Intersection
 			TArray<FIntPair> PathStack;
 			PathStack.Add(StartPoint);
 
-			if (StartDirection == EDirection::D_North && StartPoint.y > 0 && CopyRow[StartPoint.y - 1].Column[StartPoint.x] == ETileDesignation::TD_Path) {
+			if (StartDirection == EDirection::D_North && StartPoint.y - 1 > 0 && CopyRow[StartPoint.y - 1].Column[StartPoint.x] == ETileDesignation::TD_Path) {
 				if (IsValidTileLocation(StartPoint.y, StartPoint.x - 1)) {
 					CopyRow[StartPoint.y].Column[StartPoint.x - 1] = ETileDesignation::TD_Visited;
 				}
@@ -507,7 +507,7 @@ void AMazeSegment::NextIntersection(FIntPair StartPoint, FIntPair & Intersection
 					CopyRow[StartPoint.y + 1].Column[StartPoint.x] = ETileDesignation::TD_Visited;
 				}
 			}
-			else if (StartDirection == EDirection::D_South && StartPoint.y < MazeLengthInTiles && CopyRow[StartPoint.y + 1].Column[StartPoint.x] == ETileDesignation::TD_Path) {
+			else if (StartDirection == EDirection::D_South && StartPoint.y + 1< MazeLengthInTiles && CopyRow[StartPoint.y + 1].Column[StartPoint.x] == ETileDesignation::TD_Path) {
 				if (IsValidTileLocation(StartPoint.y, StartPoint.x - 1)) {
 					CopyRow[StartPoint.y].Column[StartPoint.x - 1] = ETileDesignation::TD_Visited;
 				}
@@ -518,7 +518,7 @@ void AMazeSegment::NextIntersection(FIntPair StartPoint, FIntPair & Intersection
 					CopyRow[StartPoint.y - 1].Column[StartPoint.x] = ETileDesignation::TD_Visited;
 				}
 			}
-			else if (StartDirection == EDirection::D_West && StartPoint.x > 0 && CopyRow[StartPoint.y].Column[StartPoint.x - 1] == ETileDesignation::TD_Path) {
+			else if (StartDirection == EDirection::D_West && StartPoint.x - 1 > 0 && CopyRow[StartPoint.y].Column[StartPoint.x - 1] == ETileDesignation::TD_Path) {
 				if (IsValidTileLocation(StartPoint.y, StartPoint.x + 1)) {
 					CopyRow[StartPoint.y].Column[StartPoint.x + 1] = ETileDesignation::TD_Visited;
 				}

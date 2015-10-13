@@ -176,6 +176,27 @@ void AMazeSegment::CreateMazeLayout() {
 
 }
 
+void AMazeSegment::ExtractCorners(TArray<FIntPair> InputArray, TArray<FIntPair> & Result) {
+	Result.Add(InputArray[0]);
+	for (int i = 1; i < InputArray.Num() - 1; i++) {
+		if (InputArray[i].x == InputArray[i - 1].x && InputArray[i].x != InputArray[i + 1].x) {
+			Result.Add(InputArray[i]);
+		}
+		else if (InputArray[i].y == InputArray[i - 1].y && InputArray[i].y != InputArray[i + 1].y) {
+			Result.Add(InputArray[i]);
+		}
+	}
+	Result.Add(InputArray.Last());
+}
+
+void AMazeSegment::IntPairArraytoVectorArray(TArray<FIntPair> InputArray, TArray<FVector> & Result) {
+	FVector TileLocation;
+	for (FIntPair CurrentTile : InputArray) {
+		GetLocationOfTile(TileLocation, CurrentTile.y, CurrentTile.x);
+		Result.Add(TileLocation + FVector(HalfTileSize,HalfTileSize,0.f));
+	}
+}
+
 ETileDesignation AMazeSegment::GetTileDesignationAt(int32 TileRow, int32 TileColumn) {
 	if (TileRow >= 0 && TileRow < MazeLengthInTiles && TileColumn >= 0 && TileColumn < MazeLengthInTiles) {
 		return Row[TileRow].Column[TileColumn];
@@ -386,6 +407,24 @@ void AMazeSegment::GetAllTilesInSection(FIntPair StartPoint, TArray<FIntPair> & 
 	}
 };
 
+void AMazeSegment::GetDirectionsFromVectorArray(TArray<FVector> PathArray, TArray<uint8> & DirectionArray) {
+	for (int32 i = 1; i < PathArray.Num(); i++) {
+		if (FMath::Abs(PathArray[i].X - PathArray[i - 1].X) > 0.001f) {
+			if (PathArray[i].X - PathArray[i - 1].X > 0.f) {
+				DirectionArray.Add(StaticCast<uint8>(EDirection::D_East));
+			} else {
+				DirectionArray.Add(StaticCast<uint8>(EDirection::D_West));
+			}
+		} else if (FMath::Abs(PathArray[i].Y - PathArray[i - 1].Y) > 0.001f) {
+			if (PathArray[i].Y - PathArray[i - 1].Y > 0.f) {
+				DirectionArray.Add(StaticCast<uint8>(EDirection::D_South));
+			} else {
+				DirectionArray.Add(StaticCast<uint8>(EDirection::D_North));
+			}
+		}
+	}
+}
+
 void AMazeSegment::CreateRandomPathFromStartPoint(FIntPair StartPoint, TArray<FIntPair> & Result, int32 PathLength) {
 	if (IsValidTileLocation(StartPoint.y, StartPoint.x) && Row[StartPoint.y].Column[StartPoint.x] != ETileDesignation::TD_Wall) {
 		TArray<FMazeRowData> CopyRow;
@@ -437,6 +476,28 @@ void AMazeSegment::CreateRandomPathFromStartPoint(FIntPair StartPoint, TArray<FI
 		}
 	}
 };
+
+bool AMazeSegment::IsCorner(int32 TileRow, int32 TileColumn) {
+	bool Result = false;
+	if (IsValidTileLocation(TileRow, TileColumn)) {
+		if (IsValidTileLocation(TileRow - 1, TileColumn) &&
+				Row[TileRow - 1].Column[TileColumn] == ETileDesignation::TD_Path ||
+					(IsValidTileLocation(TileRow + 1, TileColumn) &&
+						Row[TileRow + 1].Column[TileColumn] == ETileDesignation::TD_Path)) {
+			if ((IsValidTileLocation(TileRow, TileColumn - 1) &&
+					Row[TileRow].Column[TileColumn - 1] == ETileDesignation::TD_Path) ||
+						(IsValidTileLocation(TileRow, TileColumn + 1) &&
+							Row[TileRow].Column[TileColumn + 1] == ETileDesignation::TD_Path)) {
+				Result = true;
+
+			}
+
+		} 
+
+	}
+	return Result;
+
+}
 
 bool AMazeSegment::IsIntersection(int32 TileRow, int32 TileColumn) {
 	bool Result = false;
@@ -496,7 +557,7 @@ void AMazeSegment::NextIntersection(FIntPair StartPoint, FIntPair & Intersection
 					CopyRow[StartPoint.y + 1].Column[StartPoint.x] = ETileDesignation::TD_Visited;
 				}
 			}
-			else if (StartDirection == EDirection::D_East && StartPoint.x < MazeLengthInTiles && CopyRow[StartPoint.y].Column[StartPoint.x + 1] == ETileDesignation::TD_Path) {
+			else if (StartDirection == EDirection::D_East && StartPoint.x + 1 < MazeLengthInTiles && CopyRow[StartPoint.y].Column[StartPoint.x + 1] == ETileDesignation::TD_Path) {
 				if (IsValidTileLocation(StartPoint.y, StartPoint.x - 1)) {
 					CopyRow[StartPoint.y].Column[StartPoint.x - 1] = ETileDesignation::TD_Visited;
 				}

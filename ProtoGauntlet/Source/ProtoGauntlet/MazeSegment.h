@@ -21,6 +21,9 @@ public:
 	bool IsValidTileLocation(int32 TileRow, int32 TileColumn);
 
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
+	bool IsCorner(int32 TileRow, int32 TileColumn);
+
+	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
 	bool IsIntersection(int32 TileRow, int32 TileColumn);
 
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
@@ -36,13 +39,22 @@ public:
 		void CreateRandomPathFromStartPoint(FIntPair StartPoint, TArray<FIntPair> & Result, int32 PathLength = 10);
 
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
+		void ExtractCorners(TArray<FIntPair> InputArray, TArray<FIntPair> & Result);
+
+	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
+		void IntPairArraytoVectorArray(TArray<FIntPair> InputArray, TArray<FVector> & Result);
+
+	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
 	ETileDesignation GetTileDesignationAt(int32 TileRow, int32 TileColumn);
 
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
-	virtual void GetTileIndexAtLocation(FVector Location, int32 & TileRow, int32 & TileColumn);
+	void GetTileIndexAtLocation(FVector Location, int32 & TileRow, int32 & TileColumn);
 
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
-	virtual void GetLocationOfTile(FVector & Location, int32 TileRow, int32 TileColumn);
+	void GetLocationOfTile(FVector & Location, int32 TileRow, int32 TileColumn);
+
+	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
+		void GetDirectionsFromVectorArray(TArray<FVector> PathArray, TArray<uint8> & DirectionArray);
 
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
 	bool GetPathfindingActive();

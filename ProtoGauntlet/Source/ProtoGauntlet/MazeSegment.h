@@ -17,6 +17,9 @@ public:
 
 	void ChangeMazeParameters(int32 MazeLengthInTiles, float TileSize, float FloorHeight, float InnerWallHeight, float OuterWallHeight);
 
+	UPROPERTY(BlueprintReadWrite, Category = "Pathfinding")
+	bool NavMeshReady;
+
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
 	bool IsValidTileLocation(int32 TileRow, int32 TileColumn);
 

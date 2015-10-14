@@ -11,6 +11,7 @@ AMazeSegment::AMazeSegment()
 	PrimaryActorTick.bCanEverTick = false;
 
 	IsCenterPiece = false;
+	NavMeshReady = false;
 	TileSize = 400.f;
 	MazeLengthInTiles = 41;
 	FloorHeight = 100.f;

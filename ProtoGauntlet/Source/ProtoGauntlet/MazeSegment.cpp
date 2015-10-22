@@ -190,11 +190,28 @@ void AMazeSegment::ExtractCorners(TArray<FIntPair> InputArray, TArray<FIntPair> 
 	Result.Add(InputArray.Last());
 }
 
+void AMazeSegment::ExtractCornersBP(TArray<FVector> InputArray, TArray<FVector> & Result) {
+	TArray<FIntPair> FIntPairArray;
+	TArray<FIntPair> ExtractedFIntPairArray;
+	VectorArraytoIntPairArray(InputArray, FIntPairArray);
+	ExtractCorners(FIntPairArray, ExtractedFIntPairArray);
+	IntPairArraytoVectorArray(ExtractedFIntPairArray, Result);
+
+}
+
 void AMazeSegment::IntPairArraytoVectorArray(TArray<FIntPair> InputArray, TArray<FVector> & Result) {
 	FVector TileLocation;
 	for (FIntPair CurrentTile : InputArray) {
 		GetLocationOfTile(TileLocation, CurrentTile.y, CurrentTile.x);
 		Result.Add(TileLocation + FVector(HalfTileSize,HalfTileSize,0.f));
+	}
+}
+
+void AMazeSegment::VectorArraytoIntPairArray(TArray<FVector> InputArray, TArray<FIntPair> & Result) {
+	FIntPair TileIndex;
+	for (FVector CurrentLocation : InputArray) {
+		GetTileIndexAtLocation(CurrentLocation, TileIndex.y, TileIndex.x);
+		Result.Add(TileIndex);
 	}
 }
 
@@ -306,6 +323,12 @@ void AMazeSegment::FindPathBetweenPoints(FIntPair StartPoint, FIntPair EndPoint,
 		}
 	}
 };
+
+void AMazeSegment::FindPathBetweenPointsBP(int32 StartPointX, int32 StartPointY, int32 EndPointX, int32 EndPointY, TArray<FVector> & Path, EDirection StartDirection) {
+	TArray<FIntPair> FIntPairPath;
+	FindPathBetweenPoints(FIntPair(StartPointX, StartPointY), FIntPair(EndPointX, EndPointY), FIntPairPath, StartDirection);
+	IntPairArraytoVectorArray(FIntPairPath, Path);
+}
 
 void AMazeSegment::GetAllTilesInSection(FIntPair StartPoint, TArray<FIntPair> & Result, EDirection StartDirection) {
 	if (IsValidTileLocation(StartPoint.y, StartPoint.x) &&
@@ -478,6 +501,12 @@ void AMazeSegment::CreateRandomPathFromStartPoint(FIntPair StartPoint, TArray<FI
 	}
 };
 
+void AMazeSegment::CreateRandomPathFromStartPointBP(int32 StartPointX, int32 StartPointY, TArray<FVector> & Result, int32 PathLength) {
+	TArray<FIntPair> FIntPairPath;
+	CreateRandomPathFromStartPoint(FIntPair(StartPointX, StartPointY), FIntPairPath, PathLength);
+	IntPairArraytoVectorArray(FIntPairPath, Result);
+}
+
 bool AMazeSegment::IsCorner(int32 TileRow, int32 TileColumn) {
 	bool Result = false;
 	if (IsValidTileLocation(TileRow, TileColumn)) {
@@ -647,6 +676,13 @@ void AMazeSegment::NextIntersection(FIntPair StartPoint, FIntPair & Intersection
 
 		}
 	}
+}
+
+void AMazeSegment::NextIntersectionBP(int32 StartPointX, int32 StartPointY, int32 & IntersectionX, int32 & IntersectionY, EDirection StartDirection, int32 MaxDistance) {
+	FIntPair Intersection;
+	NextIntersection(FIntPair(StartPointX, StartPointY), Intersection, StartDirection, MaxDistance);
+	IntersectionX = Intersection.x;
+	IntersectionY = Intersection.y;
 }
 
 bool AMazeSegment::GetPathfindingActive() {

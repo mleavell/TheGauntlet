@@ -33,19 +33,34 @@ public:
 		void FindPathBetweenPoints(FIntPair StartPoint, FIntPair EndPoint, TArray<FIntPair> & Path, EDirection StartDirection = EDirection::D_None);
 
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
+		void FindPathBetweenPointsBP(int32 StartPointX, int32 StartPointY, int32 EndPointX, int32 EndPointY, TArray<FVector> & Path, EDirection StartDirection = EDirection::D_None);
+
+	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
 		void GetAllTilesInSection(FIntPair StartPoint, TArray<FIntPair> & Result, EDirection StartDirection);
 
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
 		void NextIntersection(FIntPair StartPoint, FIntPair & Intersection, EDirection StartDirection = EDirection::D_North, int32 MaxDistance = 5);
 
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
+		void NextIntersectionBP(int32 StartPointX, int32 StartPointY, int32 & IntersectionX, int32 & IntersectionY, EDirection StartDirection = EDirection::D_North, int32 MaxDistance = 5);
+
+	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
 		void CreateRandomPathFromStartPoint(FIntPair StartPoint, TArray<FIntPair> & Result, int32 PathLength = 10);
+
+	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
+		void CreateRandomPathFromStartPointBP(int32 StartPointX, int32 StartPointY, TArray<FVector> & Result, int32 PathLength = 10);
 
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
 		void ExtractCorners(TArray<FIntPair> InputArray, TArray<FIntPair> & Result);
 
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
+		void ExtractCornersBP(TArray<FVector> InputArray, TArray<FVector> & Result);
+
+	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
 		void IntPairArraytoVectorArray(TArray<FIntPair> InputArray, TArray<FVector> & Result);
+
+	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
+	void VectorArraytoIntPairArray(TArray<FVector> InputArray, TArray<FIntPair> & Result);
 
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
 	ETileDesignation GetTileDesignationAt(int32 TileRow, int32 TileColumn);

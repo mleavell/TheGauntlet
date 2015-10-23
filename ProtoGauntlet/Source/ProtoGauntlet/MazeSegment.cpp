@@ -507,6 +507,23 @@ void AMazeSegment::CreateRandomPathFromStartPointBP(int32 StartPointX, int32 Sta
 	IntPairArraytoVectorArray(FIntPairPath, Result);
 }
 
+bool AMazeSegment::PathHasIntersectionBP(TArray<FVector> Path, int32 & IntersectionX, int32 & IntersectionY) {
+	TArray<FIntPair> FIntPairPath;
+	bool IntersectionFound = false;
+	IntersectionX = -1;
+	IntersectionY = -1;
+
+	VectorArraytoIntPairArray(Path, FIntPairPath);
+	for (FIntPair CurrentTile : FIntPairPath) {
+		if (!IntersectionFound &&  IsIntersection(CurrentTile.y, CurrentTile.x)) {
+			IntersectionFound = true;
+			IntersectionX = CurrentTile.x;
+			IntersectionY = CurrentTile.y;
+		}
+	}
+	return IntersectionFound;
+}
+
 bool AMazeSegment::IsCorner(int32 TileRow, int32 TileColumn) {
 	bool Result = false;
 	if (IsValidTileLocation(TileRow, TileColumn)) {

@@ -21,6 +21,9 @@ public:
 	bool NavMeshReady;
 
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
+	bool PathHasIntersectionBP(TArray<FVector> Path, int32 & IntersectionX, int32 & IntersectionY);
+
+	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
 	bool IsValidTileLocation(int32 TileRow, int32 TileColumn);
 
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")

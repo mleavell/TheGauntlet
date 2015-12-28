@@ -122,7 +122,13 @@ protected:
 
 	void CalculateValues();
 
+	FIntPair ChooseRandomValidNeighbor(TArray<FIntPair>& ValidNeighbors);
+
+	void ConnectCurrentTileToPath(TArray<FIntPair>& Path, FIntPair CurrentTile);
+
 	virtual void CreateMazeLayout();
+
+	TArray<FIntPair>& GetValidNeighborsForContinuedPathCreation(FIntPair CurrentTileInPath);
 
 	virtual void PostInitProperties() override;
 
@@ -133,6 +139,8 @@ protected:
 	virtual void SpawnFloor();
 
 	virtual void SpawnWalls();
+
+	void ResetMazeLayout();
 
 	// Called every frame
 	virtual void Tick(float DeltaSeconds) override;

@@ -55,76 +55,29 @@ void AShapeshifterMaze::RaiseAllWalls() {
 }
 
 void AShapeshifterMaze::ShuffleMazeLayout() {
-	for (int y = 0; y < MazeLengthInTiles; y++) {
-		for (int x = 0; x < MazeLengthInTiles; x++) {
-			if (y % 2 == 0 && x % 2 == 0) {
-				Row[y].Column[x] = ETileDesignation::TD_Cell;
-			}
-			else{
-				Row[y].Column[x] = ETileDesignation::TD_Wall;
-			}
-		}
-	}
-
 	TArray<FIntPair> TileStack;
 	TArray<FIntPair> ValidNeighbors;
-	FIntPair StackHead;
-
-	TileStack.Push(StackHead);
+	FIntPair CurrentTileInPath;
+	
+	ResetMazeLayout();
+	TileStack.Push(CurrentTileInPath);
 	Row[0].Column[0] = ETileDesignation::TD_Path;
 
-	while (TileStack.Num()) {
-		ValidNeighbors.SetNum(0);
-
-		// Upper Neighbor
-		if (StackHead.y - 2 >= 0 && Row[StackHead.y - 2].Column[StackHead.x] == ETileDesignation::TD_Cell) {
-			ValidNeighbors.Add(FIntPair(StackHead.x, StackHead.y - 2));
-		}
-
-		// Lower Neighbor
-		if (StackHead.y + 2 < MazeLengthInTiles && Row[StackHead.y + 2].Column[StackHead.x] == ETileDesignation::TD_Cell) {
-			ValidNeighbors.Add(FIntPair(StackHead.x, StackHead.y + 2));
-		}
-
-		// Left Neighbor
-		if (StackHead.x - 2 >= 0 && Row[StackHead.y].Column[StackHead.x - 2] == ETileDesignation::TD_Cell) {
-			ValidNeighbors.Add(FIntPair(StackHead.x - 2, StackHead.y));
-		}
-
-		// Right Neighbor
-		if (StackHead.x + 2 < MazeLengthInTiles && Row[StackHead.y].Column[StackHead.x + 2] == ETileDesignation::TD_Cell) {
-			ValidNeighbors.Add(FIntPair(StackHead.x + 2, StackHead.y));
-		}
+	while (TileStack.Num() > 0) {
+		ValidNeighbors = GetValidNeighborsForContinuedPathCreation(CurrentTileInPath);
 
 		if (ValidNeighbors.Num() != 0) {
-			// Choose random valid neighbor
-			StackHead = ValidNeighbors[FMath::RandRange(0, ValidNeighbors.Num() - 1)];
+			CurrentTileInPath = ChooseRandomValidNeighbor(ValidNeighbors);
+			ConnectCurrentTileToPath(TileStack, CurrentTileInPath);
 
-			if (StackHead.y + 2 == TileStack.Last().y) {
-				Row[StackHead.y + 1].Column[StackHead.x] = ETileDesignation::TD_Path;
-
-			}
-			else if (StackHead.y - 2 == TileStack.Last().y) {
-				Row[StackHead.y - 1].Column[StackHead.x] = ETileDesignation::TD_Path;
-
-			}
-			else if (StackHead.x + 2 == TileStack.Last().x) {
-				Row[StackHead.y].Column[StackHead.x + 1] = ETileDesignation::TD_Path;
-
-			}
-			else {
-				Row[StackHead.y].Column[StackHead.x - 1] = ETileDesignation::TD_Path;
-
-			}
-
-			Row[StackHead.y].Column[StackHead.x] = ETileDesignation::TD_Path;
-			TileStack.Push(StackHead);
-		}
-		else {
+		} else {
 			TileStack.Pop();
+
 			if (TileStack.Num() != 0) {
-				StackHead = TileStack.Last();
+				CurrentTileInPath = TileStack.Last();
+
 			}
+
 		}
 
 	}

@@ -55,32 +55,8 @@ void AShapeshifterMaze::RaiseAllWalls() {
 }
 
 void AShapeshifterMaze::ShuffleMazeLayout() {
-	TArray<FIntPair> TileStack;
-	TArray<FIntPair> ValidNeighbors;
-	FIntPair CurrentTileInPath;
-	
 	ResetMazeLayout();
-	TileStack.Push(CurrentTileInPath);
-	Row[0].Column[0] = ETileDesignation::TD_Path;
-
-	while (TileStack.Num() > 0) {
-		ValidNeighbors = GetValidNeighborsForContinuedPathCreation(CurrentTileInPath);
-
-		if (ValidNeighbors.Num() != 0) {
-			CurrentTileInPath = ChooseRandomValidNeighbor(ValidNeighbors);
-			ConnectCurrentTileToPath(TileStack, CurrentTileInPath);
-
-		} else {
-			TileStack.Pop();
-
-			if (TileStack.Num() != 0) {
-				CurrentTileInPath = TileStack.Last();
-
-			}
-
-		}
-
-	}
+	CreateMazeLayout();
 }
 
 void AShapeshifterMaze::LowerInactiveWalls() {

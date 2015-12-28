@@ -77,6 +77,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
 	bool PathHasIntersectionBP(TArray<FVector> Path, int32 & IntersectionX, int32 & IntersectionY);
 
+	FIntPair RandomTileThatStartsAsCell();
+
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
 	void VectorArraytoIntPairArray(TArray<FVector> InputArray, TArray<FIntPair> & Result);
 
@@ -97,7 +99,7 @@ protected:
 		float InnerWallHeight;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dimensions")
-		bool IsCenterPiece;
+		bool HasMaze;
 
 	/** Only odd values. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dimensions")
@@ -129,6 +131,8 @@ protected:
 	virtual void CreateMazeLayout();
 
 	TArray<FIntPair>& GetValidNeighborsForContinuedPathCreation(FIntPair CurrentTileInPath);
+
+	void FormatMazeDataArrayForMazeGeneration();
 
 	virtual void PostInitProperties() override;
 

@@ -18,31 +18,31 @@ public:
 	void ChangeMazeParameters(int32 MazeLengthInTiles, float TileSize, float FloorHeight, float InnerWallHeight, float OuterWallHeight);
 
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
-	void CreateRandomPathFromStartPoint(FIntPair StartPoint, TArray<FIntPair> & Result, int32 DesiredPathLength = 10);
+	void CreateRandomPathFromStartPoint(FIntPair StartPoint, TArray<FIntPair>& Result, int32 DesiredPathLength = 10);
 
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
-	void CreateRandomPathFromStartPointBP(int32 StartPointX, int32 StartPointY, TArray<FVector> & Result, int32 PathLength = 10);
+	void CreateRandomPathFromStartPointBP(int32 StartPointX, int32 StartPointY, TArray<FVector>& Result, int32 PathLength = 10);
 
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
-	void ExtractCorners(TArray<FIntPair> InputArray, TArray<FIntPair> & Result);
+	void ExtractCorners(TArray<FIntPair> InputArray, TArray<FIntPair>& Result);
 
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
-	void ExtractCornersBP(TArray<FVector> InputArray, TArray<FVector> & Result);
+	void ExtractCornersBP(TArray<FVector> InputArray, TArray<FVector>& Result);
 
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
-	void FindPathBetweenPoints(FIntPair StartPoint, FIntPair EndPoint, TArray<FIntPair> & Path, EDirection StartDirection = EDirection::D_None);
+	void FindPathBetweenPoints(FIntPair StartPoint, FIntPair EndPoint, TArray<FIntPair>& Path, EDirection StartDirection = EDirection::D_None);
 
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
-	void FindPathBetweenPointsBP(int32 StartPointX, int32 StartPointY, int32 EndPointX, int32 EndPointY, TArray<FVector> & Path, EDirection StartDirection = EDirection::D_None);
+	void FindPathBetweenPointsBP(int32 StartPointX, int32 StartPointY, int32 EndPointX, int32 EndPointY, TArray<FVector>& Path, EDirection StartDirection = EDirection::D_None);
 
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
-	void GetAllTilesInSection(FIntPair StartPoint, TArray<FIntPair> & Result, EDirection StartDirection);
+	void GetAllTilesInSection(FIntPair StartPoint, TArray<FIntPair>& Result, EDirection StartDirection);
 
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
-	void GetDirectionsFromVectorArray(TArray<FVector> PathArray, TArray<uint8> & DirectionArray);
+	void GetDirectionsFromVectorArray(TArray<FVector> PathArray, TArray<uint8>& DirectionArray);
 
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
-	void GetLocationOfTile(FVector & Location, int32 TileRow, int32 TileColumn);
+	void GetLocationOfTile(FVector& Location, int32 TileRow, int32 TileColumn);
 
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
 	bool GetPathfindingActive();
@@ -51,10 +51,10 @@ public:
 	ETileDesignation GetTileDesignationAt(int32 TileRow, int32 TileColumn);
 
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
-	void GetTileIndexAtLocation(FVector Location, int32 & TileRow, int32 & TileColumn);
+	void GetTileIndexAtLocation(FVector Location, int32& TileRow, int32& TileColumn);
 
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
-	void IntPairArraytoVectorArray(TArray<FIntPair> InputArray, TArray<FVector> & Result);
+	void IntPairArraytoVectorArray(TArray<FIntPair> InputArray, TArray<FVector>& Result);
 
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
 	bool IsCorner(int32 TileRow, int32 TileColumn);
@@ -69,13 +69,13 @@ public:
 	bool NavMeshReady;
 
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
-	void NextIntersection(FIntPair StartPoint, FIntPair & Intersection, EDirection StartDirection = EDirection::D_North, int32 MaxDistance = 5);
+	void NextIntersection(FIntPair StartPoint, FIntPair& Intersection, EDirection StartDirection = EDirection::D_North, int32 MaxDistance = 5);
 
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
-	void NextIntersectionBP(int32 StartPointX, int32 StartPointY, int32 & IntersectionX, int32 & IntersectionY, EDirection StartDirection = EDirection::D_North, int32 MaxDistance = 5);
+	void NextIntersectionBP(int32 StartPointX, int32 StartPointY, int32& IntersectionX, int32& IntersectionY, EDirection StartDirection = EDirection::D_North, int32 MaxDistance = 5);
 
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
-	bool PathHasIntersectionBP(TArray<FVector> Path, int32 & IntersectionX, int32 & IntersectionY);
+	bool PathHasIntersectionBP(TArray<FVector> Path, int32& IntersectionX, int32& IntersectionY);
 
 	FIntPair RandomTileThatStartsAsCell();
 
@@ -83,7 +83,7 @@ public:
 	bool TileIsWall(int32 TileRow, int32 TileColumn);
 
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
-	void VectorArraytoIntPairArray(TArray<FVector> InputArray, TArray<FIntPair> & Result);
+	void VectorArraytoIntPairArray(TArray<FVector> InputArray, TArray<FIntPair>& Result);
 
 protected:
 	UPROPERTY(EditDefaultsOnly)
@@ -144,6 +144,8 @@ protected:
 	TArray<FIntPair>& GetValidNeighborsForContinuedPathCreation(FIntPair CurrentTileInPath, bool CreatingMazeLayout = false);
 
 	void FormatMazeDataArrayForMazeGeneration();
+
+	void MarkSurroundingTilesAsVisitedExcept(EDirection UnvisitedDirection, FIntPair CurrentTile, TArray<FMazeRowData>& CopyOfRow);
 
 	virtual void PostInitProperties() override;
 

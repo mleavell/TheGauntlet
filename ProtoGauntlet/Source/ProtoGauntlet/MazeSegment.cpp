@@ -17,6 +17,10 @@ AMazeSegment::AMazeSegment()
 	FloorHeight = 100.f;
 	InnerWallHeight = 600.f;
 	OuterWallHeight = 800.f;
+	NorthBorder = 0;
+	WestBorder = 0;
+	SouthBorder = MazeLengthInTiles;
+	EastBorder = MazeLengthInTiles;
 
 }
 
@@ -49,34 +53,44 @@ void AMazeSegment::ChangeMazeParameters(int32 MazeLengthInTiles, float TileSize,
 {
 	this->TileSize = TileSize;
 	this->HalfTileSize = TileSize / 2.f;
-	this->MazeLengthInTiles = MazeLengthInTiles;
 	this->FloorHeight = FloorHeight;
 	this->InnerWallHeight = InnerWallHeight;
 	this->OuterWallHeight = OuterWallHeight;
+	this->MazeLengthInTiles = MazeLengthInTiles;
+	this->SouthBorder = SouthBorder;
+	this->EastBorder = EastBorder;
+
+	if (MazeLengthInTiles % 2 == 1) {
+		this->MazeLengthInTiles++;
+	}
 }
 
 FIntPair AMazeSegment::ChooseRandomValidNeighbor(TArray<FIntPair>& ValidNeighbors) {
 	return ValidNeighbors[FMath::RandRange(0, ValidNeighbors.Num() - 1)];
 }
 
-void AMazeSegment::ConnectCurrentTileToPath(TArray<FIntPair>& Path, FIntPair CurrentTile) {
-	if (Path.Num() > 0) {
-		if (CurrentTile.y + 2 == Path.Last().y) {
-			Row[CurrentTile.y + 1].Column[CurrentTile.x] = ETileDesignation::TD_Path;
+void AMazeSegment::ConnectCurrentTileToPath(TArray<FMazeRowData>& Row,TArray<FIntPair>& Path, FIntPair CurrentTile, bool CreatingMazeLayout) {
+	if (CreatingMazeLayout) {
+		if (Path.Num() > 0) {
+			if (CurrentTile.y + 2 == Path.Last().y) {
+				Row[CurrentTile.y + 1].Column[CurrentTile.x] = ETileDesignation::TD_Path;
 
-		}else if (CurrentTile.y - 2 == Path.Last().y) {
-			Row[CurrentTile.y - 1].Column[CurrentTile.x] = ETileDesignation::TD_Path;
+			}
+			else if (CurrentTile.y - 2 == Path.Last().y) {
+				Row[CurrentTile.y - 1].Column[CurrentTile.x] = ETileDesignation::TD_Path;
 
-		}else if (CurrentTile.x + 2 == Path.Last().x) {
-			Row[CurrentTile.y].Column[CurrentTile.x + 1] = ETileDesignation::TD_Path;
+			}
+			else if (CurrentTile.x + 2 == Path.Last().x) {
+				Row[CurrentTile.y].Column[CurrentTile.x + 1] = ETileDesignation::TD_Path;
 
-		}else {
-			Row[CurrentTile.y].Column[CurrentTile.x - 1] = ETileDesignation::TD_Path;
+			}
+			else {
+				Row[CurrentTile.y].Column[CurrentTile.x - 1] = ETileDesignation::TD_Path;
 
+			}
 		}
 	}
-
-	Row[CurrentTile.y].Column[CurrentTile.x] = ETileDesignation::TD_Path;
+	Row[CurrentTile.y].Column[CurrentTile.x] = CreatingMazeLayout ? ETileDesignation::TD_Path : ETileDesignation::TD_Visited;
 	Path.Push(CurrentTile);
 }
 
@@ -87,14 +101,14 @@ void AMazeSegment::CreateMazeLayout() {
 		TArray<FIntPair> TileStack;
 		TArray<FIntPair> ValidNeighbors;
 		FIntPair CurrentTileInPath = RandomTileThatStartsAsCell();
-		ConnectCurrentTileToPath(TileStack, CurrentTileInPath);
+		ConnectCurrentTileToPath(Row, TileStack, CurrentTileInPath, true);
 
 		while (TileStack.Num() > 0) {
-			ValidNeighbors = GetValidNeighborsForContinuedPathCreation(CurrentTileInPath);
+			ValidNeighbors = GetValidNeighborsForContinuedPathCreation(CurrentTileInPath, true);
 
 			if (ValidNeighbors.Num() != 0) {
 				CurrentTileInPath = ChooseRandomValidNeighbor(ValidNeighbors);
-				ConnectCurrentTileToPath(TileStack, CurrentTileInPath);
+				ConnectCurrentTileToPath(Row, TileStack, CurrentTileInPath, true);
 
 			} else {
 				TileStack.Pop();
@@ -112,47 +126,23 @@ void AMazeSegment::CreateMazeLayout() {
 
 }
 
-void AMazeSegment::CreateRandomPathFromStartPoint(FIntPair StartPoint, TArray<FIntPair> & Result, int32 PathLength) {
-	if (IsValidTileLocation(StartPoint.y, StartPoint.x) && Row[StartPoint.y].Column[StartPoint.x] != ETileDesignation::TD_Wall) {
-		TArray<FMazeRowData> CopyRow;
-		/*for (auto& ColumnData : Row) {
-		CopyRow.Emplace(ColumnData);
-
-		}*/
-		CopyRow.Append(Row);
-		CopyRow[StartPoint.y].Column[StartPoint.x] = ETileDesignation::TD_Visited;
-		Result.Add(StartPoint);
-
+void AMazeSegment::CreateRandomPathFromStartPoint(FIntPair StartPoint, TArray<FIntPair> & Result, int32 DesiredPathLength) {
+	if (IsValidTileLocation(StartPoint.y, StartPoint.x) && !TileIsWall(StartPoint.y, StartPoint.x)) {
+		TArray<FMazeRowData> CopyOfRow;
+		FIntPair StackHead;
 		TArray<FIntPair> ValidNeighbors;
-		FIntPair StackHead = StartPoint;
-		while (Result.Num() < PathLength && Result.Num() != 0) {
-			ValidNeighbors.SetNum(0);
+		
+		CopyOfRow.Append(Row);
+		Result.Add(StartPoint);
+		StackHead = StartPoint;
+		ConnectCurrentTileToPath(CopyOfRow, Result, StackHead);
 
-			// Upper Neighbor
-			if (StackHead.y - 1 >= 0 && CopyRow[StackHead.y - 1].Column[StackHead.x] == ETileDesignation::TD_Path) {
-				ValidNeighbors.Add(FIntPair(StackHead.x, StackHead.y - 1));
-			}
-
-			// Lower Neighbor
-			if (StackHead.y + 1 < MazeLengthInTiles && CopyRow[StackHead.y + 1].Column[StackHead.x] == ETileDesignation::TD_Path) {
-				ValidNeighbors.Add(FIntPair(StackHead.x, StackHead.y + 1));
-			}
-
-			// Left Neighbor
-			if (StackHead.x - 1 >= 0 && CopyRow[StackHead.y].Column[StackHead.x - 1] == ETileDesignation::TD_Path) {
-				ValidNeighbors.Add(FIntPair(StackHead.x - 1, StackHead.y));
-			}
-
-			// Right Neighbor
-			if (StackHead.x + 1 < MazeLengthInTiles && CopyRow[StackHead.y].Column[StackHead.x + 1] == ETileDesignation::TD_Path) {
-				ValidNeighbors.Add(FIntPair(StackHead.x + 1, StackHead.y));
-			}
+		while (Result.Num() < DesiredPathLength && Result.Num() != 0) {
+			ValidNeighbors = GetValidNeighborsForContinuedPathCreation(StackHead);
 
 			if (ValidNeighbors.Num() != 0) {
-				// Choose random valid neighbor
-				StackHead = ValidNeighbors[FMath::RandRange(0, ValidNeighbors.Num() - 1)];
-				CopyRow[StackHead.y].Column[StackHead.x] = ETileDesignation::TD_Visited;
-				Result.Push(StackHead);
+				StackHead = ChooseRandomValidNeighbor(ValidNeighbors);
+				ConnectCurrentTileToPath(CopyOfRow, Result, StackHead);
 			}
 			else {
 				Result.Pop();
@@ -166,6 +156,7 @@ void AMazeSegment::CreateRandomPathFromStartPoint(FIntPair StartPoint, TArray<FI
 
 void AMazeSegment::CreateRandomPathFromStartPointBP(int32 StartPointX, int32 StartPointY, TArray<FVector> & Result, int32 PathLength) {
 	TArray<FIntPair> FIntPairPath;
+
 	CreateRandomPathFromStartPoint(FIntPair(StartPointX, StartPointY), FIntPairPath, PathLength);
 	IntPairArraytoVectorArray(FIntPairPath, Result);
 }
@@ -186,6 +177,7 @@ void AMazeSegment::ExtractCorners(TArray<FIntPair> InputArray, TArray<FIntPair> 
 void AMazeSegment::ExtractCornersBP(TArray<FVector> InputArray, TArray<FVector> & Result) {
 	TArray<FIntPair> FIntPairArray;
 	TArray<FIntPair> ExtractedFIntPairArray;
+
 	VectorArraytoIntPairArray(InputArray, FIntPairArray);
 	ExtractCorners(FIntPairArray, ExtractedFIntPairArray);
 	IntPairArraytoVectorArray(ExtractedFIntPairArray, Result);
@@ -300,6 +292,7 @@ void AMazeSegment::FindPathBetweenPoints(FIntPair StartPoint, FIntPair EndPoint,
 
 void AMazeSegment::FindPathBetweenPointsBP(int32 StartPointX, int32 StartPointY, int32 EndPointX, int32 EndPointY, TArray<FVector> & Path, EDirection StartDirection) {
 	TArray<FIntPair> FIntPairPath;
+
 	FindPathBetweenPoints(FIntPair(StartPointX, StartPointY), FIntPair(EndPointX, EndPointY), FIntPairPath, StartDirection);
 	IntPairArraytoVectorArray(FIntPairPath, Path);
 }
@@ -453,17 +446,23 @@ void AMazeSegment::GetDirectionsFromVectorArray(TArray<FVector> PathArray, TArra
 		if (FMath::Abs(PathArray[i].X - PathArray[i - 1].X) > 0.001f) {
 			if (PathArray[i].X - PathArray[i - 1].X > 0.f) {
 				DirectionArray.Add(StaticCast<uint8>(EDirection::D_East));
+
 			}
+
 			else {
 				DirectionArray.Add(StaticCast<uint8>(EDirection::D_West));
+
 			}
+
 		}
 		else if (FMath::Abs(PathArray[i].Y - PathArray[i - 1].Y) > 0.001f) {
 			if (PathArray[i].Y - PathArray[i - 1].Y > 0.f) {
 				DirectionArray.Add(StaticCast<uint8>(EDirection::D_South));
+
 			}
 			else {
 				DirectionArray.Add(StaticCast<uint8>(EDirection::D_North));
+
 			}
 		}
 	}
@@ -478,7 +477,7 @@ bool AMazeSegment::GetPathfindingActive() {
 }
 
 ETileDesignation AMazeSegment::GetTileDesignationAt(int32 TileRow, int32 TileColumn) {
-	if (TileRow >= 0 && TileRow < MazeLengthInTiles && TileColumn >= 0 && TileColumn < MazeLengthInTiles) {
+	if (TileRow >= NorthBorder && TileRow < SouthBorder && TileColumn >= WestBorder && TileColumn < EastBorder) {
 		return Row[TileRow].Column[TileColumn];
 	}
 
@@ -492,28 +491,41 @@ void AMazeSegment::GetTileIndexAtLocation(FVector Location, int32 & TileRow, int
 	TileRow = FGenericPlatformMath::FloorToInt(AdjustedLocation.Y) - 1;
 }
 
-TArray<FIntPair>& AMazeSegment::GetValidNeighborsForContinuedPathCreation(FIntPair CurrentTileInPath) {
+TArray<FIntPair>& AMazeSegment::GetValidNeighborsForContinuedPathCreation(FIntPair CurrentTileInPath, bool CreatingMazeLayout) {
+	int32 NeighborOffsetSize;
+	ETileDesignation CorrectNeighborDesignation;
 	static TArray<FIntPair> ValidNeighbors;
 	ValidNeighbors.Empty();
 
-	// Upper Neighbor
-	if (CurrentTileInPath.y - 2 >= 0 && Row[CurrentTileInPath.y - 2].Column[CurrentTileInPath.x] == ETileDesignation::TD_Cell) {
-		ValidNeighbors.Add(FIntPair(CurrentTileInPath.x, CurrentTileInPath.y - 2));
+	if (CreatingMazeLayout) {
+		CorrectNeighborDesignation = ETileDesignation::TD_Cell;
+		NeighborOffsetSize = 2;
+
+	} else {
+		CorrectNeighborDesignation = ETileDesignation::TD_Path;
+		NeighborOffsetSize = 1;
+
 	}
 
-	// Lower Neighbor
-	if (CurrentTileInPath.y + 2 < MazeLengthInTiles && Row[CurrentTileInPath.y + 2].Column[CurrentTileInPath.x] == ETileDesignation::TD_Cell) {
-		ValidNeighbors.Add(FIntPair(CurrentTileInPath.x, CurrentTileInPath.y + 2));
+	int32 NorthNeighborY = CurrentTileInPath.y - NeighborOffsetSize;
+	int32 WestNeighborX = CurrentTileInPath.x - NeighborOffsetSize;
+	int32 SouthNeighborY = CurrentTileInPath.y + NeighborOffsetSize;
+	int32 EastNeighborX = CurrentTileInPath.x + NeighborOffsetSize;
+
+	if (NorthNeighborY >= NorthBorder && Row[NorthNeighborY].Column[CurrentTileInPath.x] == CorrectNeighborDesignation) {
+		ValidNeighbors.Add(FIntPair(CurrentTileInPath.x, NorthNeighborY));
 	}
 
-	// Left Neighbor
-	if (CurrentTileInPath.x - 2 >= 0 && Row[CurrentTileInPath.y].Column[CurrentTileInPath.x - 2] == ETileDesignation::TD_Cell) {
-		ValidNeighbors.Add(FIntPair(CurrentTileInPath.x - 2, CurrentTileInPath.y));
+	if (SouthNeighborY < SouthBorder && Row[SouthNeighborY].Column[CurrentTileInPath.x] == CorrectNeighborDesignation) {
+		ValidNeighbors.Add(FIntPair(CurrentTileInPath.x, SouthNeighborY));
 	}
 
-	// Right Neighbor
-	if (CurrentTileInPath.x + 2 < MazeLengthInTiles && Row[CurrentTileInPath.y].Column[CurrentTileInPath.x + 2] == ETileDesignation::TD_Cell) {
-		ValidNeighbors.Add(FIntPair(CurrentTileInPath.x + 2, CurrentTileInPath.y));
+	if (WestNeighborX >= WestBorder && Row[CurrentTileInPath.y].Column[WestNeighborX] == CorrectNeighborDesignation) {
+		ValidNeighbors.Add(FIntPair(WestNeighborX, CurrentTileInPath.y));
+	}
+
+	if (EastNeighborX < EastBorder && Row[CurrentTileInPath.y].Column[EastNeighborX] == CorrectNeighborDesignation) {
+		ValidNeighbors.Add(FIntPair(EastNeighborX, CurrentTileInPath.y));
 	}
 
 	return ValidNeighbors;
@@ -703,6 +715,7 @@ void AMazeSegment::NextIntersection(FIntPair StartPoint, FIntPair & Intersection
 
 void AMazeSegment::NextIntersectionBP(int32 StartPointX, int32 StartPointY, int32 & IntersectionX, int32 & IntersectionY, EDirection StartDirection, int32 MaxDistance) {
 	FIntPair Intersection;
+
 	NextIntersection(FIntPair(StartPointX, StartPointY), Intersection, StartDirection, MaxDistance);
 	IntersectionX = Intersection.x;
 	IntersectionY = Intersection.y;
@@ -838,6 +851,10 @@ void AMazeSegment::Tick( float DeltaTime )
 
 }
 
+bool AMazeSegment::TileIsWall(int32 TileRow, int32 TileColumn) {
+	return Row[TileRow].Column[TileColumn] == ETileDesignation::TD_Wall;
+}
+
 void AMazeSegment::VectorArraytoIntPairArray(TArray<FVector> InputArray, TArray<FIntPair> & Result) {
 	FIntPair TileIndex;
 	for (FVector CurrentLocation : InputArray) {
@@ -865,4 +882,8 @@ void AMazeSegment::VectorArraytoIntPairArray(TArray<FVector> InputArray, TArray<
 /*for (auto& currentTile : WallRow.Column) {
 testString = EnumPtr->GetEnumName((uint8)currentTile);
 GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, testString);
+}*/
+/*for (auto& ColumnData : Row) {
+CopyRow.Emplace(ColumnData);
+
 }*/

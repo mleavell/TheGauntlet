@@ -18,7 +18,7 @@ public:
 	void ChangeMazeParameters(int32 MazeLengthInTiles, float TileSize, float FloorHeight, float InnerWallHeight, float OuterWallHeight);
 
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
-	void CreateRandomPathFromStartPoint(FIntPair StartPoint, TArray<FIntPair> & Result, int32 PathLength = 10);
+	void CreateRandomPathFromStartPoint(FIntPair StartPoint, TArray<FIntPair> & Result, int32 DesiredPathLength = 10);
 
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
 	void CreateRandomPathFromStartPointBP(int32 StartPointX, int32 StartPointY, TArray<FVector> & Result, int32 PathLength = 10);
@@ -80,11 +80,16 @@ public:
 	FIntPair RandomTileThatStartsAsCell();
 
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
+	bool TileIsWall(int32 TileRow, int32 TileColumn);
+
+	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
 	void VectorArraytoIntPairArray(TArray<FVector> InputArray, TArray<FIntPair> & Result);
 
 protected:
 	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<AActor> BorderClass; 
+		TSubclassOf<AActor> BorderClass;
+
+	int32 EastBorder;
 	
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<AActor> FloorClass;
@@ -105,6 +110,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dimensions")
 		int32 MazeLengthInTiles;
 
+	int32 NorthBorder;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dimensions")
 		float OuterWallHeight;
 
@@ -113,11 +120,15 @@ protected:
 	UPROPERTY(BlueprintReadOnly)
 		TArray<FMazeRowData> Row;
 
+	int32 SouthBorder;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dimensions")
 		float TileSize;
 
 	UPROPERTY(EditDefaultsOnly)
 		TSubclassOf<AMazeWall> WallClass;
+
+	int32 WestBorder;
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -126,11 +137,11 @@ protected:
 
 	FIntPair ChooseRandomValidNeighbor(TArray<FIntPair>& ValidNeighbors);
 
-	void ConnectCurrentTileToPath(TArray<FIntPair>& Path, FIntPair CurrentTile);
+	void ConnectCurrentTileToPath(TArray<FMazeRowData>& Row, TArray<FIntPair>& Path, FIntPair CurrentTile, bool CreatingMazeLayout = false);
 
 	virtual void CreateMazeLayout();
 
-	TArray<FIntPair>& GetValidNeighborsForContinuedPathCreation(FIntPair CurrentTileInPath);
+	TArray<FIntPair>& GetValidNeighborsForContinuedPathCreation(FIntPair CurrentTileInPath, bool CreatingMazeLayout = false);
 
 	void FormatMazeDataArrayForMazeGeneration();
 

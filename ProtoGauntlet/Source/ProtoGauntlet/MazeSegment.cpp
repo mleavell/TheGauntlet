@@ -27,6 +27,7 @@ AMazeSegment::AMazeSegment() {
 // Called when the game starts or when spawned
 void AMazeSegment::BeginPlay() {
 	Super::BeginPlay();
+	InitializeWallScaleRatios();
 	SpawnFloor();
 	SpawnBorders();
 	CreateMazeLayout();

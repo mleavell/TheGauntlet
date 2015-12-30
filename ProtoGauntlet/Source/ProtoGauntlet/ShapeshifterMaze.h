@@ -15,30 +15,30 @@ class PROTOGAUNTLET_API AShapeshifterMaze : public AMazeSegment
 
 protected:
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shapeshift")
-	float ShapeshiftDelay;
+	AShapeshifterMaze();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shapeshift")
-	float PostDepowerDelay;
+		float PostDepowerDelay;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shapeshift")
+	float ShapeshiftDelay;
 
 	virtual void BeginPlay() override;
 
 	UFUNCTION(BlueprintCallable, Category = "Shapeshift")
-	void RaiseAllWalls();
+		void LowerInactiveWalls();
+
+	UFUNCTION(BlueprintCallable, Category = "Shapeshift")
+		void RaiseAllWalls();
+
+	UFUNCTION(BlueprintImplementableEvent)
+		void Shapeshift();
 
 	UFUNCTION(BlueprintCallable, Category = "Shapeshift")
 	void ShuffleMazeLayout();
 
 	UFUNCTION(BlueprintCallable, Category = "Shapeshift")
-	void LowerInactiveWalls();
-
-	UFUNCTION(BlueprintCallable, Category = "Shapeshift")
 	void SpawnWalls();
-
-	UFUNCTION(BlueprintImplementableEvent)
-	void Shapeshift();
-
-	AShapeshifterMaze();
 	
 	
 };

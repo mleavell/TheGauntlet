@@ -96,6 +96,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<AActor> FloorClass;
 
+	float FloorClippingPreventionOffset;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dimensions")
 		float FloorHeight;
 

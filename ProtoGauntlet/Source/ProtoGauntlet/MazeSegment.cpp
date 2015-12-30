@@ -10,6 +10,7 @@ AMazeSegment::AMazeSegment() {
 	PrimaryActorTick.bCanEverTick = false;
 
 	CentimetersToWallSizeScaleRatio = 1 / 100.f;
+	FloorClippingPreventionOffset = 2.f;
 	HasMaze = true;
 	NavMeshReady = false;
 	TileSize = 400.f;
@@ -714,10 +715,10 @@ void AMazeSegment::SpawnFloor() {
 void AMazeSegment::SpawnWalls() {
 	AMazeWall* CurrentWall;
 	FVector LocationOffset;
-	float FloorClippingPreventionOffset = 0.1f;
 
 	for (int y = 0; y < MazeLengthInTiles; y++) {
 		Row[y].ColumnWallRef.SetNum(MazeLengthInTiles);
+
 		for (int x = 0; x < MazeLengthInTiles; x++) {
 			if (Row[y].Column[x] == ETileDesignation::TD_Wall) {
 				CurrentWall = Cast<AMazeWall>(GetWorld()->SpawnActor(WallClass));
@@ -771,6 +772,7 @@ void AMazeSegment::VectorArraytoIntPairArray(TArray<FVector> InputArray, TArray<
 //	}
 //}
 
+//	Here so I can just copy paste a print to screen: GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString(TEXT("Here Inactive Walls")));
 //testString = FString::FromInt(testArray.Num());
 /*for (auto& currentTile : WallRow.Column) {
 testString = EnumPtr->GetEnumName((uint8)currentTile);

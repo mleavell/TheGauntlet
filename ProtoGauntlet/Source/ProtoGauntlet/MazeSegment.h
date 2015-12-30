@@ -89,6 +89,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 		TSubclassOf<AActor> BorderClass;
 
+	float CentimetersToWallSizeScaleRatio;
+
 	int32 EastBorder;
 	
 	UPROPERTY(EditDefaultsOnly)
@@ -103,6 +105,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dimensions")
 		float InnerWallHeight;
 
+	float InnerWallHeightScale;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dimensions")
 		bool HasMaze;
 
@@ -114,6 +118,8 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dimensions")
 		float OuterWallHeight;
+
+	float OuterWallHeightScale;
 
 	bool PathfindingActive;
 
@@ -129,6 +135,12 @@ protected:
 		TSubclassOf<AMazeWall> WallClass;
 
 	int32 WestBorder;
+	
+	float WallLengthScale;
+
+	FVector WallScale;
+
+	float WallThicknessScale;
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -144,6 +156,8 @@ protected:
 	TArray<FIntPair>& GetValidNeighborsForContinuedPathCreation(FIntPair CurrentTileInPath, bool CreatingMazeLayout = false);
 
 	void FormatMazeDataArrayForMazeGeneration();
+
+	void InitializeWallScaleRatios();
 
 	void MarkSurroundingTilesAsVisitedExcept(EDirection UnvisitedDirection, FIntPair CurrentTile, TArray<FMazeRowData>& CopyOfRow);
 

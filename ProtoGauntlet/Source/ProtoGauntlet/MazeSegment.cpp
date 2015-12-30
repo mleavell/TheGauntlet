@@ -9,6 +9,7 @@ AMazeSegment::AMazeSegment() {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
+	CentimetersToWallSizeScaleRatio = 1 / 100.f;
 	HasMaze = true;
 	NavMeshReady = false;
 	TileSize = 400.f;
@@ -378,6 +379,14 @@ TArray<FIntPair>& AMazeSegment::GetValidNeighborsForContinuedPathCreation(FIntPa
 
 }
 
+void AMazeSegment::InitializeWallScaleRatios() {
+	WallThicknessScale = TileSize * CentimetersToWallSizeScaleRatio;
+	WallLengthScale = (float)((MazeLengthInTiles + 2) / 2) * WallThicknessScale;
+	OuterWallHeightScale = OuterWallHeight * CentimetersToWallSizeScaleRatio;
+	InnerWallHeightScale = InnerWallHeight * CentimetersToWallSizeScaleRatio;
+	WallScale = FVector(WallThicknessScale, WallThicknessScale, InnerWallHeightScale);
+}
+
 void AMazeSegment::IntPairArraytoVectorArray(TArray<FIntPair> InputArray, TArray<FVector>& Result) {
 	FVector TileLocation;
 	for (FIntPair CurrentTile : InputArray) {
@@ -642,68 +651,86 @@ void AMazeSegment::ResetMazeLayout() {
 }
 
 void AMazeSegment::SpawnBorders() {
-	//Left Border
-	AActor* BorderWall = GetWorld()->SpawnActor(BorderClass);
-	BorderWall->SetActorLocation(GetActorLocation() + FVector(0.f, 0.f, FloorHeight));
-	BorderWall->SetActorScale3D(FVector(TileSize / 100.f, (float)((MazeLengthInTiles + 2) / 2) * TileSize / 100.f, OuterWallHeight / 100.f));
+	float MazeLengthPlusBorderWall = (float)(MazeLengthInTiles + 1) * TileSize;
+	float HalfMazeLengthPlusBorderWall = (float)((MazeLengthInTiles + 2) / 2 + 1) * TileSize;
+	FVector BorderWallScale = FVector(WallThicknessScale, WallLengthScale, OuterWallHeightScale);
 
-	BorderWall = GetWorld()->SpawnActor(BorderClass);
-	BorderWall->SetActorLocation(GetActorLocation() + FVector(0.f, (float)((MazeLengthInTiles + 2) / 2 + 1) * TileSize, FloorHeight));
-	BorderWall->SetActorScale3D(FVector(TileSize / 100.f, (float)((MazeLengthInTiles + 2) / 2) * TileSize / 100.f, OuterWallHeight / 100.f));
+	FVector LocationOffset = FVector(0.f, 0.f, FloorHeight);
+	AActor* WestBorderWallHalf = GetWorld()->SpawnActor(BorderClass);
+	WestBorderWallHalf->SetActorLocation(GetActorLocation() + LocationOffset);
+	WestBorderWallHalf->SetActorScale3D(BorderWallScale);
 
-	//Right Border
-	BorderWall = GetWorld()->SpawnActor(BorderClass);
-	BorderWall->SetActorLocation(GetActorLocation() + FVector((float)(MazeLengthInTiles + 1) * TileSize, 0.f, FloorHeight));
-	BorderWall->SetActorScale3D(FVector(TileSize / 100.f, (float)((MazeLengthInTiles + 2) / 2) * TileSize / 100.f, OuterWallHeight / 100.f));
+	LocationOffset = FVector(0.f, HalfMazeLengthPlusBorderWall, FloorHeight);
+	WestBorderWallHalf = GetWorld()->SpawnActor(BorderClass);
+	WestBorderWallHalf->SetActorLocation(GetActorLocation() + LocationOffset);
+	WestBorderWallHalf->SetActorScale3D(BorderWallScale);
 
-	BorderWall = GetWorld()->SpawnActor(BorderClass);
-	BorderWall->SetActorLocation(GetActorLocation() + FVector((float)(MazeLengthInTiles + 1) * TileSize, (float)((MazeLengthInTiles + 2) / 2 + 1) * TileSize, FloorHeight));
-	BorderWall->SetActorScale3D(FVector(TileSize / 100.f, (float)((MazeLengthInTiles + 2) / 2) * TileSize / 100.f, OuterWallHeight / 100.f));
+	LocationOffset = FVector(MazeLengthPlusBorderWall, 0.f, FloorHeight);
+	AActor* EastBorderWallHalf = GetWorld()->SpawnActor(BorderClass);
+	EastBorderWallHalf->SetActorLocation(GetActorLocation() + LocationOffset);
+	EastBorderWallHalf->SetActorScale3D(BorderWallScale);
 
-	//Top Border
-	BorderWall = GetWorld()->SpawnActor(BorderClass);
-	BorderWall->SetActorLocation(GetActorLocation() + FVector(TileSize, 0.f, FloorHeight));
-	BorderWall->SetActorScale3D(FVector((float)(MazeLengthInTiles / 2) * TileSize / 100.f, TileSize / 100.f, OuterWallHeight / 100.f));
+	LocationOffset = FVector(MazeLengthPlusBorderWall, HalfMazeLengthPlusBorderWall, FloorHeight);
+	EastBorderWallHalf = GetWorld()->SpawnActor(BorderClass);
+	EastBorderWallHalf->SetActorLocation(GetActorLocation() + LocationOffset);
+	EastBorderWallHalf->SetActorScale3D(BorderWallScale);
 
-	BorderWall = GetWorld()->SpawnActor(BorderClass);
-	BorderWall->SetActorLocation(GetActorLocation() + FVector((float)((MazeLengthInTiles + 2) / 2 + 1) * TileSize, 0.f, FloorHeight));
-	BorderWall->SetActorScale3D(FVector((float)(MazeLengthInTiles / 2) * TileSize / 100.f, TileSize / 100.f, OuterWallHeight / 100.f));
+	WallLengthScale -= WallThicknessScale;
+	BorderWallScale = FVector(WallLengthScale, WallThicknessScale, OuterWallHeightScale);
 
-	//Bottom Border
-	BorderWall = GetWorld()->SpawnActor(BorderClass);
-	BorderWall->SetActorLocation(GetActorLocation() + FVector(TileSize, (float)(MazeLengthInTiles + 1) * TileSize, FloorHeight));
-	BorderWall->SetActorScale3D(FVector((float)(MazeLengthInTiles / 2) * TileSize / 100.f, TileSize / 100.f, OuterWallHeight / 100.f));
+	LocationOffset = FVector(TileSize, 0.f, FloorHeight);
+	AActor* NorthBorderWallHalf = GetWorld()->SpawnActor(BorderClass);
+	NorthBorderWallHalf->SetActorLocation(GetActorLocation() + LocationOffset);
+	NorthBorderWallHalf->SetActorScale3D(BorderWallScale);
 
-	BorderWall = GetWorld()->SpawnActor(BorderClass);
-	BorderWall->SetActorLocation(GetActorLocation() + FVector((float)((MazeLengthInTiles + 2) / 2 + 1) * TileSize, (float)(MazeLengthInTiles + 1) * TileSize, FloorHeight));
-	BorderWall->SetActorScale3D(FVector((float)(MazeLengthInTiles / 2) * TileSize / 100.f, TileSize / 100.f, OuterWallHeight / 100.f));
+	LocationOffset = FVector(HalfMazeLengthPlusBorderWall, 0.f, FloorHeight);
+	NorthBorderWallHalf = GetWorld()->SpawnActor(BorderClass);
+	NorthBorderWallHalf->SetActorLocation(GetActorLocation() + LocationOffset);
+	NorthBorderWallHalf->SetActorScale3D(BorderWallScale);
 
+	LocationOffset = FVector(TileSize, MazeLengthPlusBorderWall, FloorHeight);
+	AActor* SouthBorderWallHalf = GetWorld()->SpawnActor(BorderClass);
+	SouthBorderWallHalf->SetActorLocation(GetActorLocation() + LocationOffset);
+	SouthBorderWallHalf->SetActorScale3D(BorderWallScale);
 
-
+	LocationOffset = FVector(HalfMazeLengthPlusBorderWall, MazeLengthPlusBorderWall, FloorHeight);
+	SouthBorderWallHalf = GetWorld()->SpawnActor(BorderClass);
+	SouthBorderWallHalf->SetActorLocation(GetActorLocation() + LocationOffset);
+	SouthBorderWallHalf->SetActorScale3D(BorderWallScale);
 
 }
 
 void AMazeSegment::SpawnFloor() {
+	float FloorHeightScale = FloorHeight * CentimetersToWallSizeScaleRatio;
+	float FloorLengthScale = (float)(MazeLengthInTiles + 2) * WallThicknessScale;
+	FVector FloorScale = FVector(FloorLengthScale, FloorLengthScale, FloorHeightScale);
 	AActor* Floor = GetWorld()->SpawnActor(FloorClass);
 	Floor->SetActorLocation(GetActorLocation());
-	Floor->SetActorScale3D(FVector((float)(MazeLengthInTiles + 2) * TileSize / 100.f, (float)(MazeLengthInTiles + 2) * TileSize / 100.f, FloorHeight / 100.f));
+	Floor->SetActorScale3D(FloorScale);
 
 }
 
 void AMazeSegment::SpawnWalls() {
 	AMazeWall* CurrentWall;
-	float VisibilityOffset = 0.1f; // Keeps the ground from clipping with lowered walls
+	FVector LocationOffset;
+	float FloorClippingPreventionOffset = 0.1f;
+
 	for (int y = 0; y < MazeLengthInTiles; y++) {
 		Row[y].ColumnWallRef.SetNum(MazeLengthInTiles);
 		for (int x = 0; x < MazeLengthInTiles; x++) {
 			if (Row[y].Column[x] == ETileDesignation::TD_Wall) {
 				CurrentWall = Cast<AMazeWall>(GetWorld()->SpawnActor(WallClass));
+
 				if (CurrentWall) {
-					CurrentWall->SetActorLocation(GetActorLocation() + FVector((float)(x + 1) * TileSize, (float)(y + 1) * TileSize, FloorHeight - VisibilityOffset));
-					CurrentWall->SetActorScale3D(FVector(TileSize / 100.f, TileSize / 100.f, InnerWallHeight / 100.f));
+					LocationOffset = FVector((float)(x + 1) * TileSize, (float)(y + 1) * TileSize, FloorHeight - FloorClippingPreventionOffset);
+					CurrentWall->SetActorLocation(GetActorLocation() + LocationOffset);
+					CurrentWall->SetActorScale3D(WallScale);
 					Row[y].ColumnWallRef[x] = CurrentWall;
+
 				}
+
 			}
+
 		}
 
 	}

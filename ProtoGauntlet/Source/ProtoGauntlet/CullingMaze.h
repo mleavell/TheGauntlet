@@ -16,6 +16,9 @@ class PROTOGAUNTLET_API ACullingMaze : public AMazeSegment
 public:
 		ACullingMaze();
 
+		UFUNCTION(BlueprintCallable, Category = "Pathfinding")
+		void GetTileIndexAtLocation(FVector Location, int32& TileRow, int32& TileColumn);
+
 protected:
 
 	EDirection CurrentDominoFromDirection;
@@ -30,7 +33,23 @@ protected:
 
 	FTimerHandle DominoHandle;
 
+	int32 EastOuterMostPillarColumn;
+
+	int32 JustAfterHalfway;
+
+	int32 JustBeforeHalfway;
+
+	int32 MinimumPillarLayers;
+
+	int32 NorthernOuterMostPillarRow;
+
 	int32 PillarLayers;
+
+	int32 SouthernOuterMostPillarRow;
+
+	int32 SpaceBetweenPillarLayers;
+
+	int32 WestOuterMostPillarColumn;
 
 	UPROPERTY(BlueprintReadOnly)
 	TArray<AMazeWall*> StandingPillars;
@@ -52,6 +71,14 @@ protected:
 	bool IsStandingPillar(int32 WallRow, int32 WallColumn);
 
 	void LowerLayerOfPillars();
+
+	void RaisePillarsInNorthEastQuadrant();
+
+	void RaisePillarsInNorthWestQuadrant();
+
+	void RaisePillarsInSouthEastQuadrant();
+
+	void RaisePillarsInSouthWestQuadrant();
 
 	void SpawnBorders();
 

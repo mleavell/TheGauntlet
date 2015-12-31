@@ -4,6 +4,11 @@
 #include "CullingMaze.h"
 
 ACullingMaze::ACullingMaze() {
+	CurrentDominoFromDirection = EDirection::D_South;
+	JustAfterHalfway = (MazeLengthInTiles / 2) + 1;
+	JustBeforeHalfway = (MazeLengthInTiles / 2) - 1;
+	PillarLayers = 5;
+	SpaceBetweenPillarLayers = 4;
 	TimeBetweenDirectionChange = 5.f;
 	TimeBetweenDominoEffectBetweenToWalls = 4.f / (6.f * (float)MazeLengthInTiles);
 }
@@ -12,9 +17,20 @@ void ACullingMaze::BeginPlay() {
 	Super::BeginPlay();
 
 	PathfindingActive = false;
+
+	float MinimalDelay = 0.1f;
+	EastOuterMostPillarColumn = JustAfterHalfway + (SpaceBetweenPillarLayers * (PillarLayers - 1));
+	NorthernOuterMostPillarRow = JustBeforeHalfway - (SpaceBetweenPillarLayers * (PillarLayers - 1));
+	SouthernOuterMostPillarRow = EastOuterMostPillarColumn;
+	WestOuterMostPillarColumn = NorthernOuterMostPillarRow;
+
+	FTimerHandle PillarTimer;
+	GetWorldTimerManager().SetTimer(PillarTimer, this, &ACullingMaze::InitialPillarRaise, MinimalDelay, false);
+	GetWorldTimerManager().SetTimer(DominoHandle, this, &ACullingMaze::DominoWallsFromDirection, TimeBetweenDirectionChange, false);
 }
 
 void ACullingMaze::ChangeDominoDirection() {
+	LowerLayerOfPillars();
 	if (CurrentDominoFromDirection == EDirection::D_South) {
 		DominoEffectRow = 0;
 		CurrentDominoFromDirection = EDirection::D_East;
@@ -37,12 +53,12 @@ void ACullingMaze::ChangeDominoDirection() {
 }
 
 void ACullingMaze::DominoWallsFromDirection() {
-	if (CurrentDominoFromDirection == EDirection::D_South && CurrentDominoFromDirection == EDirection::D_East) {
+	if (CurrentDominoFromDirection == EDirection::D_South || CurrentDominoFromDirection == EDirection::D_East) {
 		CurrentWallRow = SouthBorder - DominoEffectRow - 1;
 		CurrentWallColumn = EastBorder - DominoEffectColumn - 1;
-
+		
 	}
-	else if (CurrentDominoFromDirection == EDirection::D_North && CurrentDominoFromDirection == EDirection::D_West) {
+	else if (CurrentDominoFromDirection == EDirection::D_North || CurrentDominoFromDirection == EDirection::D_West) {
 		CurrentWallRow = DominoEffectRow;
 		CurrentWallColumn = DominoEffectColumn;
 
@@ -82,30 +98,18 @@ void ACullingMaze::DominoWallsFromDirection() {
 
 }
 
+void ACullingMaze::GetTileIndexAtLocation(FVector Location, int32& TileRow, int32& TileColumn) {
+	FVector AdjustedLocation = Location - GetActorLocation();
+	AdjustedLocation /= TileSize;
+	TileColumn = FGenericPlatformMath::FloorToInt(AdjustedLocation.X);
+	TileRow = FGenericPlatformMath::FloorToInt(AdjustedLocation.Y);
+}
+
 void ACullingMaze::InitialPillarRaise() {
-	for (int32 y = 3; y < MazeLengthInTiles / 2; y += 4) {
-		for (int32 x = 3; x < MazeLengthInTiles / 2; x += 4) {
-			StandingPillars.Emplace(Row[y].ColumnWallRef[x]);
-			Row[y].ColumnWallRef[x]->Raise();
-		}
-
-		for (int32 x = (MazeLengthInTiles + 1) / 2; x < MazeLengthInTiles; x += 4) {
-			StandingPillars.Emplace(Row[y].ColumnWallRef[x]);
-			Row[y].ColumnWallRef[x]->Raise();
-		}
-
-	}
-	for (int32 y = (MazeLengthInTiles + 1) / 2; y < MazeLengthInTiles; y += 4) {
-		for (int32 x = 3; x < MazeLengthInTiles / 2; x += 4) {
-			StandingPillars.Emplace(Row[y].ColumnWallRef[x]);
-			Row[y].ColumnWallRef[x]->Raise();
-		}
-
-		for (int32 x = (MazeLengthInTiles + 1) / 2; x < MazeLengthInTiles; x += 4) {
-			StandingPillars.Emplace(Row[y].ColumnWallRef[x]);
-			Row[y].ColumnWallRef[x]->Raise();
-		}
-	}
+	RaisePillarsInNorthEastQuadrant();
+	RaisePillarsInNorthWestQuadrant();
+	RaisePillarsInSouthEastQuadrant();
+	RaisePillarsInSouthWestQuadrant();
 
 }
 
@@ -138,22 +142,85 @@ bool ACullingMaze::IsStandingPillar(int32 WallRow, int32 WallColumn){
 }
 
 void ACullingMaze::LowerLayerOfPillars() {
-	if (PillarLayers > 1) {
-		int32 WallIndex = 0;
-		while (WallIndex < StandingPillars.Num()) {
-			if ((int32)(StandingPillars[WallIndex]->GetActorLocation().X / TileSize) == MazeLengthInTiles / 2 - 1 - 4 * (PillarLayers - 1)
-				|| (int32)(StandingPillars[WallIndex]->GetActorLocation().Y / TileSize) == MazeLengthInTiles / 2 - 1 - 4 * (PillarLayers - 1)
-				|| (int32)(StandingPillars[WallIndex]->GetActorLocation().X / TileSize) == MazeLengthInTiles / 2 + 1 + 4 * (PillarLayers - 1)
-				|| (int32)(StandingPillars[WallIndex]->GetActorLocation().Y / TileSize) == MazeLengthInTiles / 2 + 1 + 4 * (PillarLayers - 1)) {
-				StandingPillars[WallIndex]->Lower();
-				StandingPillars.RemoveAt(WallIndex);
+	if (PillarLayers > MinimumPillarLayers) {
+		int32 PillarColumn;
+		int32 PillarRow;
+		int32 CurrentWallIndex = 0;
+
+		while (CurrentWallIndex < StandingPillars.Num()) {
+			GetTileIndexAtLocation(StandingPillars[CurrentWallIndex]->GetActorLocation(), PillarRow, PillarColumn);
+
+			if (PillarColumn == WestOuterMostPillarColumn
+				|| PillarRow == NorthernOuterMostPillarRow
+				|| PillarColumn == EastOuterMostPillarColumn
+				|| PillarRow == SouthernOuterMostPillarRow) {
+				StandingPillars[CurrentWallIndex]->Lower();
+				StandingPillars.RemoveAt(CurrentWallIndex);
+
 			}
 			else {
-				WallIndex++;
+				CurrentWallIndex++;
+
 			}
+
 		}
+
 		PillarLayers--;
+		EastOuterMostPillarColumn = JustAfterHalfway + (SpaceBetweenPillarLayers * (PillarLayers - 1));
+		NorthernOuterMostPillarRow = JustBeforeHalfway - (SpaceBetweenPillarLayers * (PillarLayers - 1));
+		SouthernOuterMostPillarRow = EastOuterMostPillarColumn;
+		WestOuterMostPillarColumn = NorthernOuterMostPillarRow;
+
 	}
+
+}
+
+void ACullingMaze::RaisePillarsInNorthEastQuadrant() {
+	for (int32 y = JustBeforeHalfway; y > JustBeforeHalfway - (SpaceBetweenPillarLayers * PillarLayers); y -= SpaceBetweenPillarLayers) {
+		for (int32 x = JustAfterHalfway; x < JustAfterHalfway + (SpaceBetweenPillarLayers * PillarLayers); x += SpaceBetweenPillarLayers) {
+			StandingPillars.Emplace(Row[y].ColumnWallRef[x]);
+			Row[y].ColumnWallRef[x]->Raise();
+
+		}
+
+	}
+
+}
+
+void ACullingMaze::RaisePillarsInNorthWestQuadrant() {
+	for (int32 y = JustBeforeHalfway; y > JustBeforeHalfway - (SpaceBetweenPillarLayers * PillarLayers); y -= SpaceBetweenPillarLayers) {
+		for (int32 x = JustBeforeHalfway; x > JustBeforeHalfway - (SpaceBetweenPillarLayers * PillarLayers); x -= SpaceBetweenPillarLayers) {
+			StandingPillars.Emplace(Row[y].ColumnWallRef[x]);
+			Row[y].ColumnWallRef[x]->Raise();
+
+		}
+
+	}
+
+}
+
+void ACullingMaze::RaisePillarsInSouthEastQuadrant() {
+		for (int32 y = JustAfterHalfway; y < JustAfterHalfway + (SpaceBetweenPillarLayers * PillarLayers); y += SpaceBetweenPillarLayers) {
+		for (int32 x = JustAfterHalfway; x < JustAfterHalfway + (SpaceBetweenPillarLayers * PillarLayers); x += SpaceBetweenPillarLayers) {
+			StandingPillars.Emplace(Row[y].ColumnWallRef[x]);
+			Row[y].ColumnWallRef[x]->Raise();
+
+		}
+
+	}
+
+}
+
+void ACullingMaze::RaisePillarsInSouthWestQuadrant() {
+	for (int32 y = JustAfterHalfway; y < JustAfterHalfway + (SpaceBetweenPillarLayers * PillarLayers); y += SpaceBetweenPillarLayers) {
+		for (int32 x = JustBeforeHalfway; x > JustBeforeHalfway - (SpaceBetweenPillarLayers * PillarLayers); x -= SpaceBetweenPillarLayers) {
+			StandingPillars.Emplace(Row[y].ColumnWallRef[x]);
+			Row[y].ColumnWallRef[x]->Raise();
+
+		}
+
+	}
+
 }
 
 void ACullingMaze::SpawnBorders() {
@@ -172,25 +239,26 @@ void ACullingMaze::SpawnFloor() {
 
 void ACullingMaze::SpawnWalls() {
 	AMazeWall* CurrentWall;
-	PillarLayers = (MazeLengthInTiles - 5) / 8 + 1;
-	CurrentDominoFromDirection = EDirection::D_South;
-	float VisibilityOffset = 10.1f; // Keeps the ground from clipping with lowered walls
+	FVector LocationOffset;
+
 	for (int y = 0; y < MazeLengthInTiles; y++) {
 		Row[y].ColumnWallRef.SetNum(MazeLengthInTiles);
+
 		for (int x = 0; x < MazeLengthInTiles; x++) {
 			CurrentWall = Cast<AMazeWall>(GetWorld()->SpawnActor(WallClass));
+
 			if (CurrentWall) {
-				CurrentWall->SetActorLocation(GetActorLocation() + FVector((float)(x) * TileSize, (float)(y) * TileSize, -InnerWallHeight + FloorHeight - VisibilityOffset));
-				CurrentWall->SetActorScale3D(FVector(TileSize / 100.f, TileSize / 100.f, InnerWallHeight / 100.f));
+				LocationOffset = FVector((float)(x)* TileSize, (float)(y)* TileSize, -InnerWallHeight + FloorHeight - FloorClippingPreventionOffset);
+				CurrentWall->SetActorLocation(GetActorLocation() + LocationOffset);
+				CurrentWall->SetActorScale3D(WallScale);
 				Row[y].ColumnWallRef[x] = CurrentWall;
+
 			}
+
 		}
 
 	}
 
-	FTimerHandle PillarTimer;
-	GetWorldTimerManager().SetTimer(PillarTimer, this, &ACullingMaze::InitialPillarRaise, 0.1f, false);
-	GetWorldTimerManager().SetTimer(DominoHandle, this, &ACullingMaze::DominoWallsFromDirection, 5.f, false);
 }
 
 void ACullingMaze::SwitchToNextColumnOfWalls() {

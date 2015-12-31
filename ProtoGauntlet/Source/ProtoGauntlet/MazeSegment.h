@@ -51,7 +51,7 @@ public:
 	ETileDesignation GetTileDesignationAt(int32 TileRow, int32 TileColumn);
 
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
-	void GetTileIndexAtLocation(FVector Location, int32& TileRow, int32& TileColumn);
+	virtual void GetTileIndexAtLocation(FVector Location, int32& TileRow, int32& TileColumn);
 
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
 	void IntPairArraytoVectorArray(TArray<FIntPair> InputArray, TArray<FVector>& Result);

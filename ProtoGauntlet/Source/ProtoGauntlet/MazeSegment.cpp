@@ -18,8 +18,8 @@ AMazeSegment::AMazeSegment() {
 	FloorHeight = 100.f;
 	InnerWallHeight = 600.f;
 	OuterWallHeight = 800.f;
-	NorthBorder = 0;
-	WestBorder = 0;
+	NorthBorder = -1;
+	WestBorder = -1;
 	SouthBorder = MazeLengthInTiles;
 	EastBorder = MazeLengthInTiles;
 

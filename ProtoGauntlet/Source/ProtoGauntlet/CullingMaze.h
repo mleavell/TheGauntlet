@@ -13,33 +13,53 @@ class PROTOGAUNTLET_API ACullingMaze : public AMazeSegment
 {
 	GENERATED_BODY()
 
-		//void CreateMazeLayout();
+public:
+		ACullingMaze();
+
 protected:
-	
-	virtual void BeginPlay() override;
 
-	void InitialPillarRaise();
-	
-	void SpawnWalls();
+	EDirection CurrentDominoFromDirection;
 
-	void SpawnBorders();
-	
-	void SpawnFloor();
+	int32 CurrentWallColumn;
+
+	int32 CurrentWallRow;
+
+	int32 DominoEffectColumn;
+
+	int32 DominoEffectRow;
+
+	FTimerHandle DominoHandle;
+
+	int32 PillarLayers;
 
 	UPROPERTY(BlueprintReadOnly)
 	TArray<AMazeWall*> StandingPillars;
 
-	int32 PillarLayers;
+	float TimeBetweenDirectionChange;
 
-	void LowerLayerOfPillars();
+	float TimeBetweenDominoEffectBetweenToWalls;
 	
+	virtual void BeginPlay() override;
+
+	void ChangeDominoDirection();
+
 	void DominoWallsFromDirection();
 
-	EDirection CurrentDominoDirection;
+	void InitialPillarRaise();
+
+	bool IsBehindStandingPillar(int32 WallRow, int32 WallColumn);
+
+	bool IsStandingPillar(int32 WallRow, int32 WallColumn);
+
+	void LowerLayerOfPillars();
+
+	void SpawnBorders();
+
+	void SpawnFloor();
 	
-	FTimerHandle DominoHandle;
+	void SpawnWalls();
 
-	int32 DominoEffectRow;
+	void SwitchToNextColumnOfWalls();
 
-	int32 DominoEffectColumn;
+	void SwitchToNextRowOfWalls();
 };

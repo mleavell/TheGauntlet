@@ -155,7 +155,7 @@ protected:
 
 	virtual void CreateMazeLayout();
 
-	TArray<FIntPair>& GetValidNeighborsForContinuedPathCreation(FIntPair CurrentTileInPath, bool CreatingMazeLayout = false);
+	TArray<FIntPair>& GetValidNeighborsForContinuedPathCreation(TArray<FMazeRowData>& Row, FIntPair CurrentTileInPath, bool CreatingMazeLayout = false);
 
 	void FormatMazeDataArrayForMazeGeneration();
 

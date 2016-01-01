@@ -106,7 +106,7 @@ void AMazeSegment::CreateMazeLayout() {
 		ConnectCurrentTileToPath(Row, TileStack, CurrentTileInPath, true);
 
 		while (TileStack.Num() > 0) {
-			ValidNeighbors = GetValidNeighborsForContinuedPathCreation(CurrentTileInPath, true);
+			ValidNeighbors = GetValidNeighborsForContinuedPathCreation(Row, CurrentTileInPath, true);
 
 			if (ValidNeighbors.Num() != 0) {
 				CurrentTileInPath = ChooseRandomValidNeighbor(ValidNeighbors);
@@ -139,7 +139,7 @@ void AMazeSegment::CreateRandomPathFromStartPoint(FIntPair StartPoint, TArray<FI
 		ConnectCurrentTileToPath(CopyOfRow, Result, StackHead);
 
 		while (Result.Num() < DesiredPathLength && Result.Num() != 0) {
-			ValidNeighbors = GetValidNeighborsForContinuedPathCreation(StackHead);
+			ValidNeighbors = GetValidNeighborsForContinuedPathCreation(CopyOfRow, StackHead);
 
 			if (ValidNeighbors.Num() != 0) {
 				StackHead = ChooseRandomValidNeighbor(ValidNeighbors);
@@ -197,7 +197,7 @@ void AMazeSegment::FindPathBetweenPoints(FIntPair StartPoint, FIntPair EndPoint,
 		MarkSurroundingTilesAsVisitedExcept(StartDirection, StartPoint, CopyOfRow);
 
 		while (Path.Num() != 0 && Path.Last() != EndPoint) {
-			ValidNeighbors = GetValidNeighborsForContinuedPathCreation(StackHead);
+			ValidNeighbors = GetValidNeighborsForContinuedPathCreation(CopyOfRow, StackHead);
 
 			if (ValidNeighbors.Num() != 0) {
 				StackHead = ChooseRandomValidNeighbor(ValidNeighbors);
@@ -273,7 +273,7 @@ void AMazeSegment::GetAllTilesInSection(FIntPair StartPoint, TArray<FIntPair>& R
 		MarkSurroundingTilesAsVisitedExcept(StartDirection, StartPoint, CopyOfRow);
 
 		while (PathStack.Num() != 0) {
-			ValidNeighbors = GetValidNeighborsForContinuedPathCreation(StackHead);
+			ValidNeighbors = GetValidNeighborsForContinuedPathCreation(CopyOfRow, StackHead);
 
 			if (ValidNeighbors.Num() != 0) {
 				StackHead = ChooseRandomValidNeighbor(ValidNeighbors);
@@ -326,7 +326,7 @@ bool AMazeSegment::GetPathfindingActive() {
 }
 
 ETileDesignation AMazeSegment::GetTileDesignationAt(int32 TileRow, int32 TileColumn) {
-	if (TileRow >= NorthBorder && TileRow < SouthBorder && TileColumn >= WestBorder && TileColumn < EastBorder) {
+	if (TileRow > NorthBorder && TileRow < SouthBorder && TileColumn > WestBorder && TileColumn < EastBorder) {
 		return Row[TileRow].Column[TileColumn];
 	}
 
@@ -334,13 +334,14 @@ ETileDesignation AMazeSegment::GetTileDesignationAt(int32 TileRow, int32 TileCol
 }
 
 void AMazeSegment::GetTileIndexAtLocation(FVector Location, int32& TileRow, int32& TileColumn) {
+	int32 AdjustmentForBorder = 1;
 	FVector AdjustedLocation = Location - GetActorLocation();
 	AdjustedLocation /= TileSize;
-	TileColumn = FGenericPlatformMath::FloorToInt(AdjustedLocation.X) - 1;
-	TileRow = FGenericPlatformMath::FloorToInt(AdjustedLocation.Y) - 1;
+	TileColumn = FGenericPlatformMath::FloorToInt(AdjustedLocation.X) - AdjustmentForBorder;
+	TileRow = FGenericPlatformMath::FloorToInt(AdjustedLocation.Y) - AdjustmentForBorder;
 }
 
-TArray<FIntPair>& AMazeSegment::GetValidNeighborsForContinuedPathCreation(FIntPair CurrentTileInPath, bool CreatingMazeLayout) {
+TArray<FIntPair>& AMazeSegment::GetValidNeighborsForContinuedPathCreation(TArray<FMazeRowData>& Row, FIntPair CurrentTileInPath, bool CreatingMazeLayout) {
 	int32 NeighborOffsetSize;
 	ETileDesignation CorrectNeighborDesignation;
 	static TArray<FIntPair> ValidNeighbors;
@@ -361,7 +362,7 @@ TArray<FIntPair>& AMazeSegment::GetValidNeighborsForContinuedPathCreation(FIntPa
 	int32 SouthNeighborY = CurrentTileInPath.y + NeighborOffsetSize;
 	int32 EastNeighborX = CurrentTileInPath.x + NeighborOffsetSize;
 
-	if (NorthNeighborY >= NorthBorder && Row[NorthNeighborY].Column[CurrentTileInPath.x] == CorrectNeighborDesignation) {
+	if (NorthNeighborY > NorthBorder && Row[NorthNeighborY].Column[CurrentTileInPath.x] == CorrectNeighborDesignation) {
 		ValidNeighbors.Add(FIntPair(CurrentTileInPath.x, NorthNeighborY));
 	}
 
@@ -369,7 +370,7 @@ TArray<FIntPair>& AMazeSegment::GetValidNeighborsForContinuedPathCreation(FIntPa
 		ValidNeighbors.Add(FIntPair(CurrentTileInPath.x, SouthNeighborY));
 	}
 
-	if (WestNeighborX >= WestBorder && Row[CurrentTileInPath.y].Column[WestNeighborX] == CorrectNeighborDesignation) {
+	if (WestNeighborX > WestBorder && Row[CurrentTileInPath.y].Column[WestNeighborX] == CorrectNeighborDesignation) {
 		ValidNeighbors.Add(FIntPair(WestNeighborX, CurrentTileInPath.y));
 	}
 

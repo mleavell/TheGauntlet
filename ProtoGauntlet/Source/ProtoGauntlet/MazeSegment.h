@@ -165,7 +165,7 @@ protected:
 
 	virtual void PostInitProperties() override;
 
-	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+	void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent);
 
 	virtual void SpawnBorders();
 	

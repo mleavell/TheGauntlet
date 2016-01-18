@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "ProtoGauntlet.h"
+#include "WallManager.h"
 #include "MazeSegment.h"
 
 
@@ -319,6 +320,14 @@ void AMazeSegment::GetDirectionsFromVectorArray(TArray<FVector> PathArray, TArra
 
 void AMazeSegment::GetLocationOfTile(FVector& Location, int32 TileRow, int32 TileColumn) {
 	Location = FVector((TileColumn + 1) * TileSize, (TileRow + 1) * TileSize, FloorHeight);
+}
+
+FMazeInfo AMazeSegment::GetMazeInfo() {
+	return FMazeInfo(MazeLengthInTiles, FloorHeight, TileSize, WallScale);
+}
+
+int32 AMazeSegment::GetMazeLengthInTiles() {
+	return MazeLengthInTiles;
 }
 
 bool AMazeSegment::GetPathfindingActive() {
@@ -714,29 +723,10 @@ void AMazeSegment::SpawnFloor() {
 }
 
 void AMazeSegment::SpawnWalls() {
-	AMazeWall* CurrentWall;
-	FVector LocationOffset;
-
-	for (int y = 0; y < MazeLengthInTiles; y++) {
-		Row[y].ColumnWallRef.SetNum(MazeLengthInTiles);
-
-		for (int x = 0; x < MazeLengthInTiles; x++) {
-			if (Row[y].Column[x] == ETileDesignation::TD_Wall) {
-				CurrentWall = Cast<AMazeWall>(GetWorld()->SpawnActor(WallClass));
-
-				if (CurrentWall) {
-					LocationOffset = FVector((float)(x + 1) * TileSize, (float)(y + 1) * TileSize, FloorHeight - FloorClippingPreventionOffset);
-					CurrentWall->SetActorLocation(GetActorLocation() + LocationOffset);
-					CurrentWall->SetActorScale3D(WallScale);
-					Row[y].ColumnWallRef[x] = CurrentWall;
-
-				}
-
-			}
-
-		}
-
-	}
+	WallManagerRef = Cast<AWallManager>(GetWorld()->SpawnActor(WallManagementClass));
+	FVector NorthWestCorner = FVector(TileSize, TileSize, FloorHeight);
+	WallManagerRef->SetActorLocation(NorthWestCorner);
+	WallManagerRef->SpawnWalls(this);
 }
 
 // Called every frame

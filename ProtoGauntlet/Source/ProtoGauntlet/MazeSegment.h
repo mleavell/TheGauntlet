@@ -6,6 +6,38 @@
 #include "MyActor.h"
 #include "MazeSegment.generated.h"
 
+class AWallManager;
+
+USTRUCT(BlueprintType)
+struct FMazeInfo
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Maze Info")
+	float FloorHeight;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Maze Info")
+		int32 MazeLengthInTiles;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Maze Info")
+		int32 TileSize;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Maze Info")
+		FVector WallScale;
+
+	FMazeInfo() {
+
+	}
+
+	FMazeInfo(int32 MazeLengthInTiles, float FloorHeight, int32 TileSize, FVector WallScale)
+	{
+		this->MazeLengthInTiles = MazeLengthInTiles;
+		this->FloorHeight = FloorHeight;
+		this->TileSize = TileSize;
+		this->WallScale = WallScale;
+	}
+};
+
 UCLASS()
 class PROTOGAUNTLET_API AMazeSegment : public AActor
 {
@@ -43,6 +75,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
 	void GetLocationOfTile(FVector& Location, int32 TileRow, int32 TileColumn);
+
+	FMazeInfo GetMazeInfo();
+
+	int32 GetMazeLengthInTiles();
 
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
 	bool GetPathfindingActive();
@@ -134,11 +170,17 @@ protected:
 		float TileSize;
 
 	UPROPERTY(EditDefaultsOnly)
-		TSubclassOf<AMazeWall> WallClass;
+	TSubclassOf<AMazeWall> WallClass;
 
 	int32 WestBorder;
 	
 	float WallLengthScale;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Wall Management")
+	TSubclassOf<AWallManager> WallManagementClass;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Wall Management")
+	AWallManager* WallManagerRef;
 
 	FVector WallScale;
 

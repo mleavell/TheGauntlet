@@ -18,8 +18,8 @@ public:
 	// Sets default values for this actor's properties
 	AWallManager();
 
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+	UFUNCTION(BlueprintPure, Category = "Wall Management")
+	int32 GetWallCount();
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Wall Management")
 	void SpawnWalls(AMazeSegment* OwningMaze);
@@ -31,13 +31,19 @@ public:
 	bool StartRaisingWallAt(int32 WallRow, int32 WallColumn, float WallRaiseInterval);
 
 	UFUNCTION(BlueprintCallable, Category = "Wall Management")
+	void TeleportWallGroundLevelAt(int32 WallRow, int32 WallColumn);
+
+	UFUNCTION(BlueprintCallable, Category = "Wall Management")
+	void TeleportWallMidAirAt(int32 WallRow, int32 WallColumn);
+
+	UFUNCTION(BlueprintCallable, Category = "Wall Management")
 	void TeleportWallUndergroundAt(int32 WallRow, int32 WallColumn);
 
 	UFUNCTION(BlueprintPure, Category = "Wall Management")
-	bool WallIsMidAirAt(int32 WallRow, int32 WallColumn);
+	bool WallIsGroundLevelAt(int32 WallRow, int32 WallColumn);
 
 	UFUNCTION(BlueprintPure, Category = "Wall Management")
-	bool WallIsGroundLevelAt(int32 WallRow, int32 WallColumn);
+	bool WallIsMidAirAt(int32 WallRow, int32 WallColumn);
 
 	UFUNCTION(BlueprintPure, Category = "Wall Management")
 	bool WallIsRaisingOrLoweringAt(int32 WallRow, int32 WallColumn);
@@ -46,6 +52,9 @@ public:
 	bool WallIsUnderGroundLevelAt(int32 WallRow, int32 WallColumn);
 
 protected:
+
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
 
 	TArray<float> EndingTime;
 

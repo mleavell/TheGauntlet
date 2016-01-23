@@ -23,6 +23,11 @@ void AWallManager::BeginPlay()
 	
 }
 
+int32 AWallManager::GetWallCount() {
+	return Walls->GetInstanceCount();
+
+}
+
 void AWallManager::SpawnWalls_Implementation(AMazeSegment* OwningMaze)
 {
 	if (!MazeRef) {
@@ -86,6 +91,14 @@ bool AWallManager::StartRaisingWallAt(int32 WallRow, int32 WallColumn, float Wal
 	return RaisingStarted;
 }
 
+void AWallManager::TeleportWallGroundLevelAt(int32 WallRow, int32 WallColumn) {
+
+}
+
+void AWallManager::TeleportWallMidAirAt(int32 WallRow, int32 WallColumn) {
+
+}
+
 void AWallManager::TeleportWallUndergroundAt(int32 WallRow, int32 WallColumn){
 	if (WallIsRaisingOrLoweringAt(WallRow, WallColumn)){
 		int32 InstanceIndex = MovingWallRowsAndColumns.Find(FIntPair(WallColumn, WallRow));
@@ -108,16 +121,17 @@ void AWallManager::TeleportWallUndergroundAt(int32 WallRow, int32 WallColumn){
 void AWallManager::UpdateAllWallTransformsAtCurrentTime_Implementation() {
 
 }
-bool AWallManager::WallIsMidAirAt(int32 WallRow, int32 WallColumn){
-	FTransform InstanceTransform;
-	Walls->GetInstanceTransform(GetInstanceIndexForWallAt(WallRow, WallColumn), InstanceTransform);
-	return FMath::IsNearlyEqual(InstanceTransform.GetLocation().Z, WallMidAirLevelZ, .001f);
-}
 
 bool AWallManager::WallIsGroundLevelAt(int32 WallRow, int32 WallColumn){
 	FTransform InstanceTransform;
 	Walls->GetInstanceTransform(GetInstanceIndexForWallAt(WallRow, WallColumn), InstanceTransform);
 	return FMath::IsNearlyEqual(InstanceTransform.GetLocation().Z, WallGroundLevelZ, .001f);
+}
+
+bool AWallManager::WallIsMidAirAt(int32 WallRow, int32 WallColumn){
+	FTransform InstanceTransform;
+	Walls->GetInstanceTransform(GetInstanceIndexForWallAt(WallRow, WallColumn), InstanceTransform);
+	return FMath::IsNearlyEqual(InstanceTransform.GetLocation().Z, WallMidAirLevelZ, .001f);
 }
 
 bool AWallManager::WallIsRaisingOrLoweringAt(int32 WallRow, int32 WallColumn){

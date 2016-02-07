@@ -6,6 +6,11 @@
 #include "MazeWall.h"
 #include "MyActor.generated.h"
 
+namespace PGUtilities
+{
+	void printString(FString InputString);
+}
+
 UENUM(BlueprintType)
 enum class EDirection : uint8
 {

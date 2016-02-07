@@ -25,6 +25,9 @@ public:
 	void SpawnWalls(AMazeSegment* OwningMaze);
 
 	UFUNCTION(BlueprintCallable, Category = "Wall Management")
+	void StopMovingWallAt(int32 WallRow, int32 WallColumn);
+
+	UFUNCTION(BlueprintCallable, Category = "Wall Management")
 	bool StartLoweringWallAt(int32 WallRow, int32 WallColumn, float WallLowerInterval);
 
 	UFUNCTION(BlueprintCallable, Category = "Wall Management")
@@ -56,7 +59,9 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	TArray<float> EndingTime;
+	TArray<FVector> TargetLocations;
+
+	TArray<float> WallMoveBeginTime;
 
 	float FloorClippingPreventionOffset;
 
@@ -86,5 +91,8 @@ protected:
 	UInstancedStaticMeshComponent* Walls;
 
 	float WallUnderGroundLevelZ;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dimensions")
+	int32 WallMovementUpdatesPerSecond;
 	
 };

@@ -3,7 +3,12 @@
 #include "ProtoGauntlet.h"
 #include "MyActor.h"
 
-
+namespace PGUtilities
+{
+	void printString(FString InputString) {
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, InputString);
+	}
+}
 // Sets default values
 AMyActor::AMyActor()
 {

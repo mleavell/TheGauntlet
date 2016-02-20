@@ -4,6 +4,9 @@
 #include "WallManager.h"
 #include "MazeSegment.h"
 
+bool AMazeSegment::AboveGroundLevelWalls(AActor* InputActor) {
+	return InputActor->GetActorLocation().Z > (InnerWallHeight + FloorHeight);
+}
 
 // Sets default values
 AMazeSegment::AMazeSegment() {

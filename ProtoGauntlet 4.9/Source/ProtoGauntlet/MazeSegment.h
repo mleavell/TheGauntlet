@@ -44,6 +44,9 @@ class PROTOGAUNTLET_API AMazeSegment : public AActor
 	GENERATED_BODY()
 	
 public:	
+	UFUNCTION(BlueprintPure, Category = "Pathfinding")
+	bool AboveGroundLevelWalls(AActor* InputActor);
+
 	// Sets default values for this actor's properties
 	AMazeSegment();
 

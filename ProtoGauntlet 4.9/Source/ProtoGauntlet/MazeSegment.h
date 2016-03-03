@@ -52,76 +52,76 @@ public:
 
 	void ChangeMazeParameters(int32 MazeLengthInTiles, float TileSize, float FloorHeight, float InnerWallHeight, float OuterWallHeight);
 
-	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Pathfinding")
 	void CreateRandomPathFromStartPoint(FIntPair StartPoint, TArray<FIntPair>& Result, int32 DesiredPathLength = 10);
 
-	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Pathfinding")
 	void CreateRandomPathFromStartPointBP(int32 StartPointX, int32 StartPointY, TArray<FVector>& Result, int32 PathLength = 10);
 
-	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Pathfinding")
 	void ExtractCorners(TArray<FIntPair> InputArray, TArray<FIntPair>& Result);
 
-	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Pathfinding")
 	void ExtractCornersBP(TArray<FVector> InputArray, TArray<FVector>& Result);
 
-	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Pathfinding")
 	void FindPathBetweenPoints(FIntPair StartPoint, FIntPair EndPoint, TArray<FIntPair>& Path, EDirection StartDirection = EDirection::D_None);
 
-	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Pathfinding")
 	void FindPathBetweenPointsBP(int32 StartPointX, int32 StartPointY, int32 EndPointX, int32 EndPointY, TArray<FVector>& Path, EDirection StartDirection = EDirection::D_None);
 
-	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Pathfinding")
 	void GetAllTilesInSection(FIntPair StartPoint, TArray<FIntPair>& Result, EDirection StartDirection);
 
-	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Pathfinding")
 	void GetDirectionsFromVectorArray(TArray<FVector> PathArray, TArray<uint8>& DirectionArray);
 
-	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Pathfinding")
 	void GetLocationOfTile(FVector& Location, int32 TileRow, int32 TileColumn);
 
 	FMazeInfo GetMazeInfo();
 
 	int32 GetMazeLengthInTiles();
 
-	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Pathfinding")
 	bool GetPathfindingActive();
 
-	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Pathfinding")
 	ETileDesignation GetTileDesignationAt(int32 TileRow, int32 TileColumn);
 
-	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Pathfinding")
 	virtual void GetTileIndexAtLocation(FVector Location, int32& TileRow, int32& TileColumn);
 
-	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Pathfinding")
 	void IntPairArraytoVectorArray(TArray<FIntPair> InputArray, TArray<FVector>& Result);
 
-	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Pathfinding")
 	bool IsCorner(int32 TileRow, int32 TileColumn);
 
-	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Pathfinding")
 	bool IsIntersection(int32 TileRow, int32 TileColumn);
 
-	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Pathfinding")
 	bool IsValidTileLocation(int32 TileRow, int32 TileColumn);
 
 	UPROPERTY(BlueprintReadWrite, Category = "Pathfinding")
 	bool NavMeshReady;
 
-	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Pathfinding")
 	void NextIntersection(FIntPair StartPoint, FIntPair& Intersection, EDirection StartDirection = EDirection::D_North, int32 MaxDistance = 5);
 
-	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Pathfinding")
 	void NextIntersectionBP(int32 StartPointX, int32 StartPointY, int32& IntersectionX, int32& IntersectionY, EDirection StartDirection = EDirection::D_North, int32 MaxDistance = 5);
 
-	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Pathfinding")
 	bool PathHasIntersectionBP(TArray<FVector> Path, int32& IntersectionX, int32& IntersectionY);
 
 	FIntPair RandomTileThatStartsAsCell();
 
-	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Pathfinding")
 	bool TileIsWall(int32 TileRow, int32 TileColumn);
 
-	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Pathfinding")
 	void VectorArraytoIntPairArray(TArray<FVector> InputArray, TArray<FIntPair>& Result);
 
 protected:
@@ -185,6 +185,7 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Wall Management")
 	AWallManager* WallManagerRef;
 
+	UPROPERTY(BlueprintReadOnly, Category = "Dimensions")
 	FVector WallScale;
 
 	float WallThicknessScale;

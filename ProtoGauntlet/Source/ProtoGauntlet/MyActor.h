@@ -6,6 +6,11 @@
 #include "MazeWall.h"
 #include "MyActor.generated.h"
 
+namespace PGUtilities
+{
+	void printString(FString InputString);
+}
+
 UENUM(BlueprintType)
 enum class EDirection : uint8
 {
@@ -13,6 +18,8 @@ enum class EDirection : uint8
 	D_East		UMETA(DisplayName = "East"),
 	D_South		UMETA(DisplayName = "South"),
 	D_West		UMETA(DisplayName = "West"),
+	D_Up		UMETA(DisplayName = "Up"),
+	D_Down		UMETA(DisplayName = "Down"),
 	D_None		UMETA(DisplayName = "None")
 };
 
@@ -61,7 +68,11 @@ struct FIntPair
 		y = InputY;
 	}
 
-	bool operator!=(FIntPair & OtherPair) {
+	bool operator ==(const FIntPair & OtherPair) const {
+		return x == OtherPair.x || y == OtherPair.y;
+	}
+
+	bool operator !=(FIntPair & OtherPair) {
 		return x != OtherPair.x || y != OtherPair.y;
 	}
 };

@@ -13,33 +13,80 @@ class PROTOGAUNTLET_API ACullingMaze : public AMazeSegment
 {
 	GENERATED_BODY()
 
-		//void CreateMazeLayout();
+public:
+		ACullingMaze();
+
+		UFUNCTION(BlueprintCallable, Category = "Pathfinding")
+		void GetTileIndexAtLocation(FVector Location, int32& TileRow, int32& TileColumn);
+
 protected:
-	
-	virtual void BeginPlay() override;
 
-	void InitialPillarRaise();
-	
-	void SpawnWalls();
+	EDirection CurrentDominoFromDirection;
 
-	void SpawnBorders();
-	
-	void SpawnFloor();
+	int32 CurrentWallColumn;
+
+	int32 CurrentWallRow;
+
+	int32 DominoEffectColumn;
+
+	int32 DominoEffectRow;
+
+	FTimerHandle DominoHandle;
+
+	int32 EastOuterMostPillarColumn;
+
+	int32 JustAfterHalfway;
+
+	int32 JustBeforeHalfway;
+
+	int32 MinimumPillarLayers;
+
+	int32 NorthernOuterMostPillarRow;
+
+	int32 PillarLayers;
+
+	int32 SouthernOuterMostPillarRow;
+
+	int32 SpaceBetweenPillarLayers;
+
+	int32 WestOuterMostPillarColumn;
 
 	UPROPERTY(BlueprintReadOnly)
 	TArray<AMazeWall*> StandingPillars;
 
-	int32 PillarLayers;
+	float TimeBetweenDirectionChange;
 
-	void LowerLayerOfPillars();
+	float TimeBetweenDominoEffectBetweenToWalls;
 	
+	virtual void BeginPlay() override;
+
+	void ChangeDominoDirection();
+
 	void DominoWallsFromDirection();
 
-	EDirection CurrentDominoDirection;
+	void InitialPillarRaise();
+
+	bool IsBehindStandingPillar(int32 WallRow, int32 WallColumn);
+
+	bool IsStandingPillar(int32 WallRow, int32 WallColumn);
+
+	void LowerLayerOfPillars();
+
+	void RaisePillarsInNorthEastQuadrant();
+
+	void RaisePillarsInNorthWestQuadrant();
+
+	void RaisePillarsInSouthEastQuadrant();
+
+	void RaisePillarsInSouthWestQuadrant();
+
+	void SpawnBorders();
+
+	void SpawnFloor();
 	
-	FTimerHandle DominoHandle;
+	void SpawnWalls();
 
-	int32 DominoEffectRow;
+	void SwitchToNextColumnOfWalls();
 
-	int32 DominoEffectColumn;
+	void SwitchToNextRowOfWalls();
 };
